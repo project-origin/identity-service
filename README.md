@@ -1,6 +1,6 @@
 ![alt text](doc/logo.png)
 
-# Project Origin Example IdentityService
+# Project Origin IdentityService
 
 TODO Describe the project here
 
