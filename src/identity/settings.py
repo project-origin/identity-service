@@ -6,7 +6,6 @@ DEBUG = os.environ.get('DEBUG') in ('1', 't', 'true', 'yes')
 # -- Project -----------------------------------------------------------------
 
 PROJECT_NAME = 'Project Origin IdentityService'
-CORS_ORIGINS = os.environ['CORS_ORIGINS']
 TOKEN_EXPIRE_MINUTES = os.environ['TOKEN_EXPIRE_MINUTES']
 SECRET = os.environ['SECRET']
 FAILURE_REDIRECT_URL = os.environ['FAILURE_REDIRECT_URL']
