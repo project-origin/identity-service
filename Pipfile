@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pytest = "*"
 waitress = "*"
 gunicorn = "*"
 gevent = "*"
@@ -30,4 +29,4 @@ python_version = "3.7"
 migrate = "alembic upgrade head"
 revision = "alembic revision --autogenerate"
 develop = "python serve.py --port 9120"
-production = "gunicorn -b 0.0.0.0:9120 origin:app --workers 1 --worker-class gevent --worker-connections 10"
+production = "gunicorn -b 0.0.0.0:9120 identity:app --workers 1 --worker-class gevent --worker-connections 10"
