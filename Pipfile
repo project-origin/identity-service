@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+waitress = "*"
+
+[packages]
+gunicorn = "*"
+gevent = "*"
+flask = "*"
+flask-wtf = "*"
+flask-cors = "*"
+email_validator = "*"
+psycopg2 = "*"
+SQLAlchemy = "*"
+alembic = "*"
+marshmallow = "*"
+marshmallow_dataclass = "*"
+marshmallow_enum = "*"
+requests = "*"
+authlib = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+migrate = "alembic upgrade head"
+revision = "alembic revision --autogenerate"
+develop = "python -m waitress --port=9120 identity:app"
+production = "gunicorn -b 0.0.0.0:9120 identity:app --workers 1 --worker-class gevent --worker-connections 10"
