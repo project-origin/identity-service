@@ -16,8 +16,7 @@ FAILURE_REDIRECT_URL = os.environ['FAILURE_REDIRECT_URL']
 __current_file = os.path.abspath(__file__)
 __current_folder = os.path.split(__current_file)[0]
 
-PROJECT_DIR = os.path.abspath(os.path.join(__current_folder, '..', '..'))
-SOURCE_DIR = os.path.join(PROJECT_DIR, 'src')
+SOURCE_DIR = os.path.abspath(os.path.join(__current_folder, '..'))
 MIGRATIONS_DIR = os.path.join(SOURCE_DIR, 'migrations')
 ALEMBIC_CONFIG_PATH = os.path.join(MIGRATIONS_DIR, 'alembic.ini')
 TEMPLATES_DIR = os.path.join(SOURCE_DIR, 'templates')

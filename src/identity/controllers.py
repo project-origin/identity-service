@@ -66,6 +66,8 @@ def login():
     try:
         login_request = hydra.get_login_request(challenge)
     except HydraException:
+        # TODO logging
+        raise
         return get_unknown_response()
 
     # Already logged in (remembered)?
@@ -148,6 +150,8 @@ def consent():
     try:
         consent_request = hydra.get_consent_request(challenge)
     except HydraException:
+        # TODO logging
+        raise
         return get_unknown_response()
 
     user = registry.get_user(subject=consent_request.subject)
