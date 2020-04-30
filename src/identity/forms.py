@@ -15,18 +15,18 @@ class RegisterForm(FlaskForm):
     company = StringField('Company name', validators=[DataRequired()])
     email = StringField('E-mail', validators=[DataRequired(), Email(), email_available])
     password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('Remember')
+    remember = BooleanField('Remember', default=True)
     submit = SubmitField('Create user')
 
 
 class LoginForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('remember')
+    remember = BooleanField('remember', default=True)
     submit = SubmitField('Sign In')
 
 
 class ConsentForm(FlaskForm):
-    remember = BooleanField('Remember')
+    remember = BooleanField('Remember', default=True)
     grant = SubmitField('Allow')
     deny = SubmitField('Cancel')

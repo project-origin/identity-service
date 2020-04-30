@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+  namespace: project-origin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-deployment
+  template:
+    metadata:
+      labels:
+        app: identity-deployment
+    spec:
+      containers:
+        - name: identity-container
+          image: projectorigin/identity-service:2133
+          
+          envFrom:
+            - configMapRef:
+                name: namespace-config
+            - configMapRef:
+                name: identity-config
+            - secretRef:
+                name: identity-system-secret
+            - secretRef:
+                name: identity-db-secret
+
+          ports:
+          - containerPort: 9120
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra-deployment
+  namespace: project-origin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra-deployment
+  template:
+    metadata:
+      labels:
+        app: hydra-deployment
+    spec:
+
+      initContainers:
+        - name: hydra-migrate-container
+          image: oryd/hydra:v1.4.8
+          args: ['migrate', 'sql', '--yes', '--read-from-env']
+          env:
+            - name: 'DSN'
+              valueFrom:
+                secretKeyRef:
+                  name: hydra-db-secret
+                  key: DATABASE_URI
+
+      containers:
+        - name: hydra-container
+          image: oryd/hydra:v1.4.8
+          args: ['serve', 'all', '--dangerous-force-http']
+          ports:
+            - containerPort: 4444
+            - containerPort: 4445
+          envFrom:
+            - secretRef:
+                name: hydra-system-secret
+            - configMapRef:
+                name: hydra-config
+          env:
+            - name: 'DSN'
+              valueFrom:
+                secretKeyRef:
+                  name: hydra-db-secret
+                  key: DATABASE_URI
+
+          
