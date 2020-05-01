@@ -113,6 +113,7 @@ class Hydra:
     def __init__(self, url):
         self.url = url
 
+
     def get_login_request(self, challenge: str) -> LoginRequest:
 
         url = f'{self.url}/oauth2/auth/requests/login'
@@ -125,6 +126,7 @@ class Hydra:
 
         else:
             raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
 
     def accept_login(self, challenge: str, request: LoginAccept) -> RedirectResponse:
 
@@ -148,6 +150,7 @@ class Hydra:
             print(response.content)
             raise HydraException("Bad response from auth server.")
 
+
     def reject_login(self, challenge: str, rejection: RejectConcent) -> RedirectResponse:
 
         response = put(f'{self.url}/oauth2/auth/requests/login/reject?login_challenge={challenge}',
@@ -163,6 +166,23 @@ class Hydra:
             print(response.content)
             raise HydraException("Bad response from auth server.")
 
+
+    def accept_logout(self, challenge: str) -> RedirectResponse:
+
+        response = put(f'{self.url}/oauth2/auth/requests/logout/accept',
+                    params={'logout_challenge': challenge},
+                    headers={'Accept': 'application/json'},
+                    verify=False)
+
+        if response.status_code == 200:
+            return redirect_schema.loads(response.content)
+
+        else:
+            print(response)
+            print(response.content)
+            raise HydraException("Bad response from auth server.")
+
+
     def get_consent_request(self, challenge: str) -> ConsentRequest:
 
         response = get(f'{self.url}/oauth2/auth/requests/consent?consent_challenge={challenge}',
@@ -175,6 +195,7 @@ class Hydra:
             print(response)
             print(response.content)
             raise HydraException("Bad response from auth server.")
+
 
     def accept_consent(self, challenge: str, request: GrantConsent) -> RedirectResponse:
 
@@ -192,6 +213,7 @@ class Hydra:
             print(response)
             print(response.content)
             raise HydraException("Bad response from auth server.")
+
 
     def reject_consent(self, challenge: str, rejection: RejectConcent) -> RedirectResponse:
 
