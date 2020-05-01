@@ -106,6 +106,19 @@ def login():
     return render_template('login.html', **env)
 
 
+def logout():
+    """
+    TODO
+    """
+    challenge = request.args.get('logout_challenge')
+
+    if not challenge:
+        return get_unknown_response()
+    
+    res = hydra.accept_logout(challenge)
+    return redirect(res.redirect_to)
+
+
 def consent():
     """
     TODO
