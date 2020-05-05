@@ -7,7 +7,6 @@ resources:
 
 variables:
   imageName: 'projectorigin/identity-service'
-  tag: '$(Build.BuildId)'
   vmImageName: 'ubuntu-latest'
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     tag: '$(Build.BuildId)'
