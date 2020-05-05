@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired, Email, ValidationError
+from wtforms.validators import DataRequired, Email, ValidationError, EqualTo
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 
 from .registry import registry
@@ -14,8 +14,12 @@ class RegisterForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     company = StringField('Company name', validators=[DataRequired()])
     email = StringField('E-mail', validators=[DataRequired(), Email(), email_available])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+        DataRequired(), 
+        EqualTo('confirm', message='Passwords must match') ])
+    confirm = PasswordField('Repeat password')
     remember = BooleanField('Remember', default=True)
+    agree = BooleanField('', default=False, validators=[DataRequired(), ])
     submit = SubmitField('Create user')
 
 

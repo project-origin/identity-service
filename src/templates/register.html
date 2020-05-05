@@ -30,6 +30,7 @@
             {{ form.email.label }}<br>
             {{ form.email(size=32) }}
         </p>
+
         <p>
             {% for error in form.password.errors %}
                 <span style="color: red;">[{{ error }}]</span><br>
@@ -37,6 +38,32 @@
             {{ form.password.label }}<br>
             {{ form.password(size=32) }}
         </p>
+
+        <p>
+            {% for error in form.confirm.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.confirm.label }}<br>
+            {{ form.confirm(size=32) }}
+        </p>
+        
+        <p>
+            {% for error in form.remember.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.remember.label }}<br>
+            {{ form.remember(size=32) }}
+        </p>
+
+        <p>
+            {% for error in form.agree.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            I have read and agree with the <a href="/terms" target="_blank">terms</a><br>
+            {{ form.agree(size=32) }}
+        </p>
+
+
         <p>{{ form.submit() }}</p>
 
         <a href="{{ login_url }}">Go back</a>

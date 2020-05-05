@@ -4,7 +4,7 @@ import logging
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
-from .controllers import login, consent, register, logout
+from .controllers import login, consent, register, logout, terms, error_handler
 from .settings import (
     DEBUG,
     SECRET,
@@ -41,3 +41,6 @@ app.add_url_rule('/login', 'login', login, methods=['GET', 'POST'])
 app.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 app.add_url_rule('/consent', 'consent', consent, methods=['GET', 'POST'])
 app.add_url_rule('/register', 'register', register, methods=['GET', 'POST'])
+app.add_url_rule('/terms', 'terms', terms, methods=['GET'])
+app.register_error_handler(404, error_handler)
+app.register_error_handler(500, error_handler)

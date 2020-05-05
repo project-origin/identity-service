@@ -33,7 +33,7 @@ def register():
     challenge = request.args.get('challenge')
 
     if not challenge:
-        return get_unknown_response()
+        raise Exception("No challenge in form")
 
     if form.validate_on_submit():
         registry.create(
@@ -61,14 +61,13 @@ def login():
     error = None
 
     if not challenge:
-        return get_unknown_response()
+        raise Exception("No challenge in form")
 
     try:
         login_request = hydra.get_login_request(challenge)
     except HydraException:
         # TODO logging
-        raise
-        return get_unknown_response()
+        raise Exception("Hydra exception")
 
     # Already logged in (remembered)?
     if login_request.skip:
@@ -113,7 +112,7 @@ def logout():
     challenge = request.args.get('logout_challenge')
 
     if not challenge:
-        return get_unknown_response()
+        raise Exception("No logout_challenge")
     
     res = hydra.accept_logout(challenge)
     return redirect(res.redirect_to)
@@ -127,7 +126,7 @@ def consent():
     challenge = request.args.get('consent_challenge')
 
     if not challenge:
-        return get_unknown_response()
+        raise Exception("No consent_challenge")
 
     # Consent form submitted - grant or deny consent?
     if form.is_submitted():
@@ -156,21 +155,19 @@ def consent():
             ))
             return redirect(res.redirect_to)
         else:
-            # Unknown/invalid post
-            return get_unknown_response()
+            raise Exception("Unknown/invalid post")
 
     # Consent form not submitted
     try:
         consent_request = hydra.get_consent_request(challenge)
     except HydraException:
         # TODO logging
-        raise
-        return get_unknown_response()
+        raise Exception("Hydra exception")
 
     user = registry.get_user(subject=consent_request.subject)
 
     if user is None:
-        return get_unknown_response()
+        raise Exception("User not found")
 
     # Already given consent (remembered)?
     if consent_request.skip:
@@ -205,7 +202,14 @@ def consent():
     return render_template('consent.html', **env)
 
 
-def get_unknown_response():
+def terms():
+    """
+    TODO
+    """
+    return render_template('terms.html')
+
+
+def error_handler(e=None):
     """
     :rtype: flask.Response
     """

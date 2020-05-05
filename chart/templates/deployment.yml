@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: identity-container
-          image: projectorigin/identity-service:2160
+          image: projectorigin/identity-service:{{ .Values.tag }}
           
           envFrom:
             - configMapRef:
@@ -66,11 +66,14 @@ spec:
             - containerPort: 4444
             - containerPort: 4445
           envFrom:
-            - secretRef:
-                name: hydra-system-secret
             - configMapRef:
                 name: hydra-config
           env:
+            - name: 'SECRETS_SYSTEM'
+              valueFrom:
+                secretKeyRef:
+                  name: hydra-system-secret
+                  key: SECRET
             - name: 'DSN'
               valueFrom:
                 secretKeyRef:
