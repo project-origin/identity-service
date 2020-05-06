@@ -9,11 +9,11 @@ variables:
   imageName: 'projectorigin/identity-service'
   vmImageName: 'ubuntu-latest'
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
-    kubeCon: alpha-origin-con
+    kubeCon: 'kube-origin-con'
     tag: '$(Build.BuildId)'
     namespace: 'project-origin'
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
-    kubeCon: origin-kubernetes-connection
+    kubeCon: 'kube-origin-con'
     tag: 'dev.$(Build.BuildId)'
     namespace: 'dev-project-origin'
 
