@@ -44,7 +44,6 @@ stages:
         tags: |
           latest
           $(tag)
-
           
 - stage: update_cluster
   displayName: Update kubernetes
