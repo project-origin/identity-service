@@ -25,6 +25,9 @@ class User(ModelBase):
     name = sa.Column(sa.String(), nullable=False)
     company = sa.Column(sa.String(), nullable=False)
 
+    # Token for resetting password
+    reset_password_token = sa.Column(sa.String())
+
     def __str__(self):
         return 'User<%s>' % self.sub
 

@@ -34,3 +34,22 @@ class ConsentForm(FlaskForm):
     remember = BooleanField('Remember', default=True)
     grant = SubmitField('Allow')
     deny = SubmitField('Cancel')
+
+
+# -- Reset/change password flow ----------------------------------------------
+
+
+class ResetPasswordForm(FlaskForm):
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    submit = SubmitField('Send verification code via e-mail')
+
+
+class EnterVerificationCodeForm(FlaskForm):
+    verification_code = StringField('Verification code', validators=[DataRequired()])
+    submit = SubmitField('Next')
+
+
+class ChangePasswordForm(FlaskForm):
+    password1 = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Password (confirm)', validators=[DataRequired()])
+    submit = SubmitField('Save new password')

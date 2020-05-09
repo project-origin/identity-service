@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 from flask import request, render_template, redirect, url_for
 
-from .forms import LoginForm, RegisterForm, ConsentForm
+from .forms import LoginForm, RegisterForm, ConsentForm, ResetPasswordForm, EnterVerificationCodeForm, \
+    ChangePasswordForm
 from .registry import registry
+from .email import email_service
 from .settings import (
     HYDRA_URL,
     TOKEN_EXPIRE_MINUTES,
@@ -20,6 +22,10 @@ from .hydra import (
 
 
 LOGIN_ERROR_MSG = 'The email / password combination is not correct'
+EMAIL_ERROR_MSG = 'E-mail was not recognized'
+VERIFICATION_CODE_ERROR_MSG = 'Wrong verification code'
+VERIFICATION_CODE_EMAIL_ERROR_MSG = 'Wrong e-mail or verification code'
+PASSWORD_CONFIRM_ERROR_MSG = 'The two passwords did not match'
 
 
 hydra = Hydra(HYDRA_URL)
@@ -100,6 +106,7 @@ def login():
         'form': form,
         'error': error,
         'register_url': url_for('register', challenge=challenge),
+        'reset_password_url': url_for('reset-password', challenge=challenge),
     }
 
     return render_template('login.html', **env)
@@ -200,6 +207,136 @@ def consent():
     }
 
     return render_template('consent.html', **env)
+
+
+# -- Reset/change password flow ----------------------------------------------
+
+
+def reset_password():
+    """
+    User enters e-mail in formular.
+    An e-mail with a verification code is then sent to the user.
+    Redirects to "enter-verification-code" view afterwards.
+    """
+    form = ResetPasswordForm()
+    challenge = request.args.get('challenge')
+    error = None
+
+    if not challenge:
+        raise Exception("No challenge in args")
+
+    # Form submitted and validated correctly?
+    if form.validate_on_submit():
+        user = registry.get_user(email=form.email.data)
+
+        # Authentication successful?
+        if user is None:
+            error = EMAIL_ERROR_MSG
+        else:
+            registry.assign_reset_password_token(user)
+            email_service.send_reset_password_email(user)
+
+            return redirect(url_for(
+                'enter-verification-code',
+                challenge=challenge,
+                email=user.email,
+            ))
+
+    env = {
+        'form': form,
+        'error': error,
+        'login_url': url_for('login', login_challenge=challenge),
+    }
+
+    return render_template('reset-password.html', **env)
+
+
+def enter_verification_code():
+    """
+    User enters the verification code sent to their e-mail.
+    Redirects to "change-password" view afterwards.
+    """
+    form = EnterVerificationCodeForm()
+    challenge = request.args.get('challenge')
+    email = request.args.get('email')
+    error = None
+
+    if not challenge:
+        raise Exception("No challenge in args")
+    if not email:
+        raise Exception("No email in args")
+
+    # Form submitted and validated correctly?
+    if form.validate_on_submit():
+        user = registry.get_user(email=email)
+
+        # Authentication successful?
+        if user is None:
+            error = EMAIL_ERROR_MSG
+        elif (user.reset_password_token is None
+              or user.reset_password_token != form.verification_code.data):
+            error = VERIFICATION_CODE_ERROR_MSG
+        else:
+            return redirect(url_for(
+                'change-password',
+                challenge=challenge,
+                email=user.email,
+                verification_code=form.verification_code.data,
+            ))
+
+    env = {
+        'form': form,
+        'error': error,
+        'login_url': url_for('login', login_challenge=challenge),
+    }
+
+    return render_template('enter-verification-code.html', **env)
+
+
+def change_password():
+    """
+    User enters the verification code sent to their e-mail.
+    Redirects to "change-password" view afterwards.
+    """
+    form = ChangePasswordForm()
+    challenge = request.args.get('challenge')
+    email = request.args.get('email')
+    verification_code = request.args.get('verification_code')
+    error = None
+    complete = False
+
+    if not challenge:
+        raise Exception("No challenge in args")
+    if not email:
+        raise Exception("No email in args")
+    if not verification_code:
+        raise Exception("No verification_code in args")
+
+    user = registry.get_user(
+        email=email,
+        reset_password_token=verification_code,
+    )
+
+    if user is None or user.reset_password_token is None:
+        error = VERIFICATION_CODE_EMAIL_ERROR_MSG
+    elif form.validate_on_submit():
+        if form.password1.data != form.password2.data:
+            error = PASSWORD_CONFIRM_ERROR_MSG
+        else:
+            registry.assign_password(user, form.password1.data)
+            complete = True
+
+    env = {
+        'form': form,
+        'error': error,
+        'complete': complete,
+        'login_url': url_for('login', login_challenge=challenge),
+    }
+
+    return render_template('change-password.html', **env)
+
+
+# -- Misc --------------------------------------------------------------------
 
 
 def terms():

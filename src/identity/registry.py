@@ -49,6 +49,9 @@ class UserRegistry(object):
         :param Session session:
         :rtype: User
         """
+        if 'email' in filters:
+            filters['email'] = self.normalize_email(filters['email'])
+
         return session.query(User) \
             .filter_by(**filters) \
             .one_or_none()
@@ -73,6 +76,30 @@ class UserRegistry(object):
         :rtype: str
         """
         return hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), SECRET.encode('utf-8'), 100000).hex()
+
+    @atomic
+    def assign_password(self, user, password, session):
+        """
+        :param User user:
+        :param str password:
+        :param Session session:
+        """
+        session.query(User) \
+            .filter(User.id == user.id) \
+            .update({
+                'password': self.password_hash(password),
+                'reset_password_token': None,
+            })
+
+    @atomic
+    def assign_reset_password_token(self, user, session):
+        """
+        :param User user:
+        :param Session session:
+        """
+        session.query(User) \
+            .filter(User.id == user.id) \
+            .update({'reset_password_token': str(uuid4())})
 
 
 registry = UserRegistry()

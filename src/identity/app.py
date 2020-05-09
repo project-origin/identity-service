@@ -4,12 +4,22 @@ import logging
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 
-from .controllers import login, consent, register, logout, terms, error_handler
 from .settings import (
     DEBUG,
     SECRET,
     TEMPLATES_DIR,
     STATIC_DIR,
+)
+from .controllers import (
+    login,
+    consent,
+    register,
+    logout,
+    terms,
+    error_handler,
+    reset_password,
+    enter_verification_code,
+    change_password,
 )
 
 # Import models here for SQLAlchemy to detech them
@@ -42,5 +52,8 @@ app.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 app.add_url_rule('/consent', 'consent', consent, methods=['GET', 'POST'])
 app.add_url_rule('/register', 'register', register, methods=['GET', 'POST'])
 app.add_url_rule('/terms', 'terms', terms, methods=['GET'])
+app.add_url_rule('/reset-password', 'reset-password', reset_password, methods=['GET', 'POST'])
+app.add_url_rule('/enter-verification-code', 'enter-verification-code', enter_verification_code, methods=['GET', 'POST'])
+app.add_url_rule('/change-password', 'change-password', change_password, methods=['GET', 'POST'])
 app.register_error_handler(404, error_handler)
 app.register_error_handler(500, error_handler)
