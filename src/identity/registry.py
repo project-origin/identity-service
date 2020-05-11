@@ -78,6 +78,16 @@ class UserRegistry(object):
         return hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), SECRET.encode('utf-8'), 100000).hex()
 
     @atomic
+    def update_details(self, user, session, **details):
+        """
+        :param User user:
+        :param Session session:
+        """
+        session.query(User) \
+            .filter(User.id == user.id) \
+            .update(details)
+
+    @atomic
     def assign_password(self, user, password, session):
         """
         :param User user:
@@ -97,9 +107,11 @@ class UserRegistry(object):
         :param User user:
         :param Session session:
         """
+        token = str(uuid4())
+        user.reset_password_token = token
         session.query(User) \
             .filter(User.id == user.id) \
-            .update({'reset_password_token': str(uuid4())})
+            .update({'reset_password_token': token})
 
 
 registry = UserRegistry()

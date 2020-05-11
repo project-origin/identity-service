@@ -53,3 +53,12 @@ class ChangePasswordForm(FlaskForm):
     password1 = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Password (confirm)', validators=[DataRequired()])
     submit = SubmitField('Save new password')
+
+
+# -- Edit profile flow -------------------------------------------------------
+
+
+class EditProfileForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    company = StringField('Company name', validators=[DataRequired()])
+    submit = SubmitField('Save')

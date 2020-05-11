@@ -21,6 +21,8 @@ marshmallow_dataclass = "*"
 marshmallow_enum = "*"
 requests = "*"
 authlib = "*"
+sendgrid = "*"
+pyjwt = "*"
 opencensus-ext-azure = "*"
 
 [requires]

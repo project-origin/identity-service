@@ -9,6 +9,14 @@
     <form action="" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
+        <p>
+            We have sent a verification code to your e-mail address.
+        </p>
+
+        <p>
+            Copy/paste it into the text field below:
+        </p>
+
         {% if error %}
             <span style="color: red;">[{{ error }}]</span><br>
         {% endif %}

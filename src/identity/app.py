@@ -19,6 +19,7 @@ from .controllers import (
     reset_password,
     enter_verification_code,
     change_password,
+    edit_profile,
 )
 
 # Import models here for SQLAlchemy to detect them
@@ -63,5 +64,6 @@ app.add_url_rule('/terms', 'terms', terms, methods=['GET'])
 app.add_url_rule('/reset-password', 'reset-password', reset_password, methods=['GET', 'POST'])
 app.add_url_rule('/enter-verification-code', 'enter-verification-code', enter_verification_code, methods=['GET', 'POST'])
 app.add_url_rule('/change-password', 'change-password', change_password, methods=['GET', 'POST'])
+app.add_url_rule('/edit-profile', 'edit-profile', edit_profile, methods=['GET', 'POST'])
 app.register_error_handler(404, error_handler)
 app.register_error_handler(500, error_handler)

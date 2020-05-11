@@ -1,5 +1,6 @@
+import jwt
 from datetime import datetime, timezone
-from flask import request, render_template, redirect, url_for
+from flask import request, render_template, redirect, url_for, make_response
 
 from identity.registry import registry
 from identity.email import email_service
@@ -10,12 +11,13 @@ from identity.forms import (
     ResetPasswordForm,
     EnterVerificationCodeForm,
     ChangePasswordForm,
+    EditProfileForm,
 )
 from identity.settings import (
     HYDRA_URL,
     TOKEN_EXPIRE_MINUTES,
     FAILURE_REDIRECT_URL,
-)
+    SECRET)
 from identity.hydra import (
     Hydra,
     Session,
@@ -24,6 +26,8 @@ from identity.hydra import (
     RejectConcent,
 )
 
+
+TOKEN_COOKIE_NAME = 'token'
 
 LOGIN_ERROR_MSG = 'The email / password combination is not correct'
 EMAIL_ERROR_MSG = 'E-mail was not recognized'
@@ -82,7 +86,12 @@ def login():
             remember=login_request.skip,
             remember_for=TOKEN_EXPIRE_MINUTES,
         ))
-        return redirect(res.redirect_to)
+
+        # The token is used when editing profile or changing password
+        token = jwt.encode({'subject': login_request.subject}, SECRET, algorithm='HS256')
+        response = make_response(redirect(res.redirect_to))
+        response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_MINUTES*60)
+        return response
 
     # Login form submitted and validated correctly?
     if form.validate_on_submit():
@@ -98,9 +107,14 @@ def login():
             res = hydra.accept_login(challenge, LoginAccept(
                 subject=user.subject,
                 remember=form.remember.data,
-                remember_for=60
+                remember_for=TOKEN_EXPIRE_MINUTES
             ))
-            return redirect(res.redirect_to)
+
+            # The token is used when editing profile or changing password
+            token = jwt.encode({'subject': user.subject}, SECRET, algorithm='HS256')
+            response = make_response(redirect(res.redirect_to))
+            response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_MINUTES*60)
+            return response
 
     env = {
         'form': form,
@@ -122,7 +136,10 @@ def logout():
         raise Exception("No logout_challenge")
     
     res = hydra.accept_logout(challenge)
-    return redirect(res.redirect_to)
+
+    response = make_response(redirect(res.redirect_to))
+    response.delete_cookie(TOKEN_COOKIE_NAME)
+    return response
 
 
 def consent():
@@ -145,7 +162,7 @@ def consent():
                 grant_scope=req.requested_scope,
                 handled_at=get_now_iso(),
                 remember=form.remember.data,
-                remember_for=TOKEN_EXPIRE_MINUTES,
+                remember_for=TOKEN_EXPIRE_MINUTES*60,
                 session=Session(
                     access_token={},
                     id_token=user.id_token,
@@ -178,7 +195,7 @@ def consent():
             grant_scope=req.requested_scope,
             handled_at=get_now_iso(),
             remember=False,
-            remember_for=TOKEN_EXPIRE_MINUTES,
+            remember_for=TOKEN_EXPIRE_MINUTES*60,
             session=Session(
                 access_token={},
                 id_token=user.id_token,
@@ -264,14 +281,14 @@ def enter_verification_code():
         if user is None:
             error = EMAIL_ERROR_MSG
         elif (user.reset_password_token is None
-              or user.reset_password_token != form.verification_code.data):
+              or user.reset_password_token != form.verification_code.data.strip()):
             error = VERIFICATION_CODE_ERROR_MSG
         else:
             return redirect(url_for(
                 'change-password',
                 challenge=challenge,
                 email=user.email,
-                verification_code=form.verification_code.data,
+                verification_code=form.verification_code.data.strip(),
             ))
 
     env = {
@@ -324,6 +341,49 @@ def change_password():
     }
 
     return render_template('change-password.html', **env)
+
+
+# -- Edit profile flow -------------------------------------------------------
+
+
+def edit_profile():
+    """
+    TODO
+    """
+    token = request.cookies.get(TOKEN_COOKIE_NAME)
+    token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
+    user = registry.get_user(subject=token_decoded['subject'])
+
+    if not user:
+        raise Exception("Subject not found")
+
+    form = EditProfileForm()
+    return_url = request.args.get('return_url')
+    error = None
+
+    if not return_url:
+        raise Exception("No return_url in args")
+
+    # Form submitted and validated correctly?
+    if form.is_submitted():
+        if form.validate():
+            registry.update_details(user, **{
+                'name': form.name.data,
+                'company': form.company.data,
+            })
+
+            return redirect(return_url)
+    else:
+        form.name.data = user.name
+        form.company.data = user.company
+
+    env = {
+        'form': form,
+        'error': error,
+        'return_url': return_url,
+    }
+
+    return render_template('edit-profile.html', **env)
 
 
 # -- Misc --------------------------------------------------------------------
