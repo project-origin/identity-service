@@ -21,6 +21,7 @@ marshmallow_dataclass = "*"
 marshmallow_enum = "*"
 requests = "*"
 authlib = "*"
+opencensus-ext-azure = "*"
 
 [requires]
 python_version = "3.7"

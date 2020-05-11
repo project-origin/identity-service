@@ -1,19 +1,23 @@
 from datetime import datetime, timezone
 from flask import request, render_template, redirect, url_for
 
-from .forms import LoginForm, RegisterForm, ConsentForm, ResetPasswordForm, EnterVerificationCodeForm, \
-    ChangePasswordForm
-from .registry import registry
-from .email import email_service
-from .settings import (
+from identity.registry import registry
+from identity.email import email_service
+from identity.forms import (
+    LoginForm,
+    RegisterForm,
+    ConsentForm,
+    ResetPasswordForm,
+    EnterVerificationCodeForm,
+    ChangePasswordForm,
+)
+from identity.settings import (
     HYDRA_URL,
     TOKEN_EXPIRE_MINUTES,
     FAILURE_REDIRECT_URL,
 )
-
-from .hydra import (
+from identity.hydra import (
     Hydra,
-    HydraException,
     Session,
     LoginAccept,
     GrantConsent,
@@ -69,11 +73,7 @@ def login():
     if not challenge:
         raise Exception("No challenge in form")
 
-    try:
-        login_request = hydra.get_login_request(challenge)
-    except HydraException:
-        # TODO logging
-        raise Exception("Hydra exception")
+    login_request = hydra.get_login_request(challenge)
 
     # Already logged in (remembered)?
     if login_request.skip:
@@ -164,13 +164,7 @@ def consent():
         else:
             raise Exception("Unknown/invalid post")
 
-    # Consent form not submitted
-    try:
-        consent_request = hydra.get_consent_request(challenge)
-    except HydraException:
-        # TODO logging
-        raise Exception("Hydra exception")
-
+    consent_request = hydra.get_consent_request(challenge)
     user = registry.get_user(subject=consent_request.subject)
 
     if user is None:
@@ -191,10 +185,6 @@ def consent():
             )
         ))
         return redirect(res.redirect_to)
-
-    # client_name = consent_request.client.client_name
-    # if client_name == "":
-    #     client_name = consent_request.client.client_id
 
     # scopes = [SCOPES[s] for s in consent_request.requested_scope]
     scopes = [s for s in consent_request.requested_scope]

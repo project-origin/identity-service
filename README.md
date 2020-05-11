@@ -17,3 +17,5 @@ Name | Description | Example
 **URLs:** | |
 `HYDRA_URL` | URL to Hydra without trailing slash | `https://auth.projectorigin.dk`
 `FAILURE_REDIRECT_URL` | An arbitrary URL to redirect to if something unexpected fails | `https://app.projectorigin.dk`
+**Logging:** | |
+`AZURE_APP_INSIGHTS_CONN_STRING` | Azure Application Insight connection string (optional) | `InstrumentationKey=19440978-19a8-4d07-9a99-b7a31d99f313`

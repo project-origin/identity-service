@@ -52,3 +52,8 @@ HYDRA_WANTED_SCOPES = (
     'ggo.transfer',
     'ggo.retire',
 )
+
+
+# -- Misc --------------------------------------------------------------------
+
+AZURE_APP_INSIGHTS_CONN_STRING = os.environ.get('AZURE_APP_INSIGHTS_CONN_STRING')
