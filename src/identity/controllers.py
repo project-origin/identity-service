@@ -98,7 +98,7 @@ def login():
             res = hydra.accept_login(challenge, LoginAccept(
                 subject=user.subject,
                 remember=form.remember.data,
-                remember_for=60
+                remember_for=TOKEN_EXPIRE_MINUTES
             ))
             return redirect(res.redirect_to)
 
