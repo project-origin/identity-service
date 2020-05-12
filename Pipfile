@@ -34,5 +34,5 @@ python_version = "3.7"
 [scripts]
 migrate = "alembic upgrade head"
 revision = "alembic revision --autogenerate"
-develop = "python -m waitress --port=9120 identity:app"
+develop = "python -m waitress --port=9120 identity:app --name \"IdentityService\""
 production = "gunicorn -b 0.0.0.0:9120 identity:app --workers 1 --worker-class gevent --worker-connections 10"
