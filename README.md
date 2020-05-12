@@ -15,6 +15,7 @@ Name | Description | Example
 `DATABASE_CONN_POLL_SIZE` | Connection pool size per container | `10`
 `TOKEN_EXPIRE_MINUTES` | Number of minutes to keep the token valid | `4320`
 **URLs:** | |
+`PROJECT_URL` | Public URL to this service without trailing slash | `https://identity.projectorigin.dk`
 `HYDRA_URL` | URL to Hydra without trailing slash | `https://auth.projectorigin.dk`
 `FAILURE_REDIRECT_URL` | An arbitrary URL to redirect to if something unexpected fails | `https://app.projectorigin.dk`
 **E-mail:** | |
