@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit profile
+{% endblock %}
+
+{% block content %}
+    <h1>Edit profile</h1>
+    <form action="" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <p>
+            {% for error in form.name.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
+        </p>
+        <p>
+            {% for error in form.company.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.company.label }}<br>
+            {{ form.company(size=32) }}
+        </p>
+
+        <p>{{ form.submit() }}</p>
+
+        <a href="{{ return_url }}">Go back</a>
+    </form>
+{% endblock %}
