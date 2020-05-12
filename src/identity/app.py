@@ -1,13 +1,18 @@
 import logging
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect
+from opencensus.trace import config_integration
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.trace.samplers import ProbabilitySampler
 
 from .settings import (
     SECRET,
     TEMPLATES_DIR,
     STATIC_DIR,
     AZURE_APP_INSIGHTS_CONN_STRING,
+    PROJECT_NAME,
 )
 from .controllers import (
     login,
@@ -26,10 +31,14 @@ from .controllers import (
 from .models import *
 
 
+config_integration.trace_integrations(['requests'])
+config_integration.trace_integrations(['sqlalchemy'])
+
+
 # -- Flask setup -------------------------------------------------------------
 
 app_kwargs = dict(
-    import_name=__name__,
+    import_name=PROJECT_NAME,
     template_folder=TEMPLATES_DIR,
     static_url_path='/static',
     static_folder=STATIC_DIR,
@@ -49,6 +58,12 @@ if AZURE_APP_INSIGHTS_CONN_STRING:
     )
     handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
+
+    middleware = FlaskMiddleware(
+        app,
+        exporter=AzureExporter(connection_string=AZURE_APP_INSIGHTS_CONN_STRING),
+        sampler=ProbabilitySampler(rate=1.0),
+    )
 
 
 csrf = CSRFProtect(app)

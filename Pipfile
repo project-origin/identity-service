@@ -23,7 +23,10 @@ requests = "*"
 authlib = "*"
 sendgrid = "*"
 pyjwt = "*"
+opencensus-ext-flask = "*"
 opencensus-ext-azure = "*"
+opencensus-ext-requests = "*"
+opencensus-ext-sqlalchemy = "*"
 
 [requires]
 python_version = "3.7"

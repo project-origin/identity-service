@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8ecc48e37f27f4b9817c6d68627cdeea582e515059c450e4457c88d3f8e35c9b"
+            "sha256": "dbbeb57aedf73802cc4882626212211d506614e84f41cd4edc4217cdd731061b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -355,6 +355,27 @@
             "index": "pypi",
             "version": "==1.0.2"
         },
+        "opencensus-ext-flask": {
+            "hashes": [
+                "sha256:0de123d4a808ed1fc6e9c9b8832acfb5773e7e107f11bf9fa519c2133cc19fed"
+            ],
+            "index": "pypi",
+            "version": "==0.7.3"
+        },
+        "opencensus-ext-requests": {
+            "hashes": [
+                "sha256:9647988dd6c2f07685ae43e9e3c957e840ef7515ee55472ba42f7dba71893b44"
+            ],
+            "index": "pypi",
+            "version": "==0.7.3"
+        },
+        "opencensus-ext-sqlalchemy": {
+            "hashes": [
+                "sha256:b3a4e7c4387a8b163044e6f38aba621428682285d68d60c63e48a9098cca6a8c"
+            ],
+            "index": "pypi",
+            "version": "==0.1.2"
+        },
         "protobuf": {
             "hashes": [
                 "sha256:0bae429443cc4748be2aadfdaf9633297cfaeb24a9a02d0ab15849175ce90fab",
@@ -554,6 +575,12 @@
                 "sha256:6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c"
             ],
             "version": "==1.0.1"
+        },
+        "wrapt": {
+            "hashes": [
+                "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"
+            ],
+            "version": "==1.12.1"
         },
         "wtforms": {
             "hashes": [
