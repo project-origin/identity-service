@@ -5,7 +5,8 @@ DEBUG = os.environ.get('DEBUG') in ('1', 't', 'true', 'yes')
 
 # -- Project -----------------------------------------------------------------
 
-PROJECT_NAME = 'Project Origin IdentityService'
+PROJECT_NAME = 'IdentityService'
+PROJECT_URL = os.environ['PROJECT_URL']
 SECRET = os.environ['SECRET']
 TOKEN_EXPIRE_MINUTES = int(os.environ['TOKEN_EXPIRE_MINUTES'])
 FAILURE_REDIRECT_URL = os.environ['FAILURE_REDIRECT_URL']

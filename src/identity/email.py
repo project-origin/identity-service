@@ -1,19 +1,25 @@
 import sendgrid
 from sendgrid.helpers.mail import Email, Content, Mail, To
+from urllib.parse import urlencode
 
 from .models import User
 from .settings import (
     EMAIL_FROM_NAME,
     EMAIL_FROM_ADDRESS,
     SENDGRID_API_KEY,
-)
+    PROJECT_URL)
 
 
 RESET_PASSWORD_TEMPLATE = """Dear %(name)s
 
-To reset your password, copy and paste this token into the formular:
+To reset your password, click or copy/paste this link in your browser to reset your password:
 
-%(reset_password_token)s"""
+%(url)s
+
+Your verification code is:
+
+%(reset_password_token)s
+"""
 
 
 class EmailService(object):
@@ -33,11 +39,19 @@ class EmailService(object):
         """
         pass
 
-    def send_reset_password_email(self, user):
+    def send_reset_password_email(self, user, challenge):
         """
         :param User user:
+        :param str challenge:
         """
+        query = urlencode({
+            'email': user.email,
+            'challenge': challenge,
+            'verification_code': user.reset_password_token,
+        })
+
         env = {
+            'url': f'{PROJECT_URL}/enter-verification-code?{query}',
             'name': user.name,
             'company': user.company,
             'reset_password_token': user.reset_password_token,

@@ -1,6 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired, Email, ValidationError, EqualTo
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    ValidationError,
+    EqualTo,
+    Length,
+)
 
 from .registry import registry
 
@@ -16,7 +22,9 @@ class RegisterForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email(), email_available])
     password = PasswordField('Password', validators=[
         DataRequired(), 
-        EqualTo('confirm', message='Passwords must match') ])
+        EqualTo('confirm', message='Passwords must match'),
+        Length(min=8),
+    ])
     confirm = PasswordField('Repeat password')
     remember = BooleanField('Remember', default=True)
     agree = BooleanField('', default=False, validators=[DataRequired(), ])
@@ -50,8 +58,8 @@ class EnterVerificationCodeForm(FlaskForm):
 
 
 class ChangePasswordForm(FlaskForm):
-    password1 = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Password (confirm)', validators=[DataRequired()])
+    password1 = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
+    password2 = PasswordField('Password (confirm)', validators=[DataRequired(), Length(min=8)])
     submit = SubmitField('Save new password')
 
 

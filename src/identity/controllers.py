@@ -241,7 +241,7 @@ def reset_password():
             error = EMAIL_ERROR_MSG
         else:
             registry.assign_reset_password_token(user)
-            email_service.send_reset_password_email(user)
+            email_service.send_reset_password_email(user, challenge)
 
             return redirect(url_for(
                 'enter-verification-code',
@@ -263,25 +263,30 @@ def enter_verification_code():
     User enters the verification code sent to their e-mail.
     Redirects to "change-password" view afterwards.
     """
-    form = EnterVerificationCodeForm()
+    if request.method == 'GET':
+        form = EnterVerificationCodeForm(request.args)
+    elif request.method == 'POST':
+        form = EnterVerificationCodeForm(request.form)
+    else:
+        raise RuntimeError('Should NOT have happened!')
+
     challenge = request.args.get('challenge')
     email = request.args.get('email')
     error = None
+
+    user = registry.get_user(email=email)
 
     if not challenge:
         raise Exception("No challenge in args")
     if not email:
         raise Exception("No email in args")
+    if not user:
+        raise Exception("User not found")
+    if user.reset_password_token is None:
+        raise Exception("User has no reset token")
 
-    # Form submitted and validated correctly?
-    if form.validate_on_submit():
-        user = registry.get_user(email=email)
-
-        # Authentication successful?
-        if user is None:
-            error = EMAIL_ERROR_MSG
-        elif (user.reset_password_token is None
-              or user.reset_password_token != form.verification_code.data.strip()):
+    if form.is_submitted() or form.verification_code.data.strip():
+        if user.reset_password_token != form.verification_code.data.strip():
             error = VERIFICATION_CODE_ERROR_MSG
         else:
             return redirect(url_for(
