@@ -52,18 +52,23 @@ app.config['SECRET_KEY'] = SECRET
 if AZURE_APP_INSIGHTS_CONN_STRING:
     print('Exporting logs to Azure Application Insight', flush=True)
 
+    def __telemetry_processor(envelope):
+        envelope.data.baseData.cloud_roleName = PROJECT_NAME
+        envelope.tags['ai.cloud.role'] = PROJECT_NAME
+
     handler = AzureLogHandler(
         connection_string=AZURE_APP_INSIGHTS_CONN_STRING,
         export_interval=5.0,
     )
+    handler.add_telemetry_processor(__telemetry_processor)
     handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
 
-    middleware = FlaskMiddleware(
-        app,
-        exporter=AzureExporter(connection_string=AZURE_APP_INSIGHTS_CONN_STRING),
-        sampler=ProbabilitySampler(rate=1.0),
-    )
+    exporter = AzureExporter(connection_string=AZURE_APP_INSIGHTS_CONN_STRING)
+    exporter.add_telemetry_processor(__telemetry_processor)
+    sampler = ProbabilitySampler(1.0)
+
+    opencensus = FlaskMiddleware(app, sampler=sampler, exporter=exporter)
 
 
 csrf = CSRFProtect(app)
