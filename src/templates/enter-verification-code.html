@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Reset password
+{% endblock %}
+
+{% block content %}
+    <h1>Reset password</h1>
+    <form action="" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <p>
+            We have sent a link with a verification code to your e-mail address.
+        </p>
+
+        <p>
+            Click the link, or copy/paste the verification code into the text field below:
+        </p>
+
+        {% if error %}
+            <span style="color: red;">[{{ error }}]</span><br>
+        {% endif %}
+
+        <p>
+            {% for error in form.verification_code.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.verification_code.label }}<br>
+            {{ form.verification_code(size=32) }}
+        </p>
+        <p>
+            {{ form.submit() }}
+        </p>
+
+        <a href="{{ login_url }}">Go back</a>
+    </form>
+{% endblock %}

@@ -5,9 +5,10 @@ DEBUG = os.environ.get('DEBUG') in ('1', 't', 'true', 'yes')
 
 # -- Project -----------------------------------------------------------------
 
-PROJECT_NAME = 'Project Origin IdentityService'
+PROJECT_NAME = 'IdentityService'
+PROJECT_URL = os.environ['PROJECT_URL']
 SECRET = os.environ['SECRET']
-TOKEN_EXPIRE_MINUTES = os.environ['TOKEN_EXPIRE_MINUTES']
+TOKEN_EXPIRE_MINUTES = int(os.environ['TOKEN_EXPIRE_MINUTES'])
 FAILURE_REDIRECT_URL = os.environ['FAILURE_REDIRECT_URL']
 
 
@@ -52,3 +53,13 @@ HYDRA_WANTED_SCOPES = (
     'ggo.transfer',
     'ggo.retire',
 )
+
+
+# -- Misc --------------------------------------------------------------------
+
+AZURE_APP_INSIGHTS_CONN_STRING = os.environ.get(
+    'AZURE_APP_INSIGHTS_CONN_STRING')
+
+EMAIL_FROM_NAME = os.environ['EMAIL_FROM_NAME']
+EMAIL_FROM_ADDRESS = os.environ['EMAIL_FROM_ADDRESS']
+SENDGRID_API_KEY = os.environ['SENDGRID_API_KEY']
