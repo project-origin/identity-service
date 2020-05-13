@@ -20,6 +20,7 @@ class RegisterForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     company = StringField('Company name', validators=[DataRequired()])
     email = StringField('E-mail', validators=[DataRequired(), Email(), email_available])
+    phone = StringField('Phone', validators=[DataRequired()])
     password = PasswordField('Password', validators=[
         DataRequired(), 
         EqualTo('confirm', message='Passwords must match'),
@@ -69,4 +70,5 @@ class ChangePasswordForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     company = StringField('Company name', validators=[DataRequired()])
+    phone = StringField('Phone', validators=[DataRequired()])
     submit = SubmitField('Save')

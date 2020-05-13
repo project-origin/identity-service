@@ -21,6 +21,7 @@ class User(ModelBase):
 
     # Details
     email = sa.Column(sa.String(), index=True, nullable=False)
+    phone = sa.Column(sa.String(), index=True)
     password = sa.Column(sa.String(), nullable=False)
     name = sa.Column(sa.String(), nullable=False)
     company = sa.Column(sa.String(), nullable=False)
@@ -35,6 +36,7 @@ class User(ModelBase):
     def id_token(self):
         return {
             'email': self.email,
+            'phone': self.phone,
             'name': self.name,
             'company': self.company,
         }

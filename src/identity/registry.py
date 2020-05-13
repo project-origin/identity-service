@@ -9,11 +9,12 @@ from .settings import SECRET
 class UserRegistry(object):
 
     @atomic
-    def create(self, name, company, email, password, session):
+    def create(self, name, company, email, phone, password, session):
         """
         :param str name:
         :param str company:
         :param str email:
+        :param str phone:
         :param str password:
         :param Session session:
         :rtype: User
@@ -21,6 +22,7 @@ class UserRegistry(object):
         session.add(User(
             subject=str(uuid4()),
             email=self.normalize_email(email),
+            phone=phone,
             password=self.password_hash(password),
             name=name,
             company=company,

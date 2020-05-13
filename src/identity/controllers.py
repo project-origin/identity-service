@@ -54,6 +54,7 @@ def register():
             name=form.name.data,
             company=form.company.data,
             email=form.email.data,
+            phone=form.phone.data,
             password=form.password.data,
         )
         return redirect(url_for('login', login_challenge=challenge))
@@ -375,12 +376,14 @@ def edit_profile():
             registry.update_details(user, **{
                 'name': form.name.data,
                 'company': form.company.data,
+                'phone': form.phone.data,
             })
 
             return redirect(return_url)
     else:
         form.name.data = user.name
         form.company.data = user.company
+        form.phone.data = user.phone
 
     env = {
         'form': form,

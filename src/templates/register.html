@@ -30,6 +30,13 @@
             {{ form.email.label }}<br>
             {{ form.email(size=32) }}
         </p>
+        <p>
+            {% for error in form.phone.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.phone.label }}<br>
+            {{ form.phone(size=32) }}
+        </p>
 
         <p>
             {% for error in form.password.errors %}
