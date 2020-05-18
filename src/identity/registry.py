@@ -19,14 +19,36 @@ class UserRegistry(object):
         :param Session session:
         :rtype: User
         """
-        session.add(User(
+        user = User(
             subject=str(uuid4()),
             email=self.normalize_email(email),
             phone=phone,
             password=self.password_hash(password),
             name=name,
             company=company,
-        ))
+            active=False,
+            activate_token=str(uuid4()),
+        )
+
+        session.add(user)
+
+        return user
+
+    @atomic
+    def activate(self, user, session):
+        """
+        :param User user:
+        :param Session session:
+        :rtype: User
+        """
+        user.active = True
+        user.activate_token = None
+        session.query(User) \
+            .filter(User.id == user.id) \
+            .update({
+                'active': True,
+                'activate_token': None,
+            })
 
     @inject_session
     def authenticate(self, email, password, session):
@@ -39,6 +61,7 @@ class UserRegistry(object):
         filters = (
             User.email == self.normalize_email(email),
             User.password == self.password_hash(password),
+            User.active == True,
         )
 
         return session.query(User) \

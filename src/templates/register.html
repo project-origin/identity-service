@@ -5,74 +5,88 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Register</h1>
-    <form action="" method="post" novalidate>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <p>
-            {% for error in form.name.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.name.label }}<br>
-            {{ form.name(size=32) }}
-        </p>
-        <p>
-            {% for error in form.company.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.company.label }}<br>
-            {{ form.company(size=32) }}
-        </p>
-        <p>
-            {% for error in form.email.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.email.label }}<br>
-            {{ form.email(size=32) }}
-        </p>
-        <p>
-            {% for error in form.phone.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.phone.label }}<br>
-            {{ form.phone(size=32) }}
-        </p>
+    {% if complete %}
 
-        <p>
-            {% for error in form.password.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.password.label }}<br>
-            {{ form.password(size=32) }}
-        </p>
-
-        <p>
-            {% for error in form.confirm.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.confirm.label }}<br>
-            {{ form.confirm(size=32) }}
-        </p>
-        
-        <p>
-            {% for error in form.remember.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            {{ form.remember.label }}<br>
-            {{ form.remember(size=32) }}
-        </p>
-
-        <p>
-            {% for error in form.agree.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
-            {% endfor %}
-            I have read and agree with the <a href="/terms" target="_blank">terms</a><br>
-            {{ form.agree(size=32) }}
-        </p>
-
-
-        <p>{{ form.submit() }}</p>
-
+        <h1>Account created</h1>
+        <p>Your account must be activated before you can login.</p>
+        <p>Follow the link in the e-mail we have sent you to complete the registration.</p>
         <a href="{{ login_url }}">Go back</a>
-    </form>
+
+    {% else %}
+
+        <h1>Register</h1>
+
+        <form action="" method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <p>
+                {% for error in form.name.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.name.label }}<br>
+                {{ form.name(size=32) }}
+            </p>
+            <p>
+                {% for error in form.company.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.company.label }}<br>
+                {{ form.company(size=32) }}
+            </p>
+            <p>
+                {% for error in form.email.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.email.label }}<br>
+                {{ form.email(size=32) }}
+            </p>
+            <p>
+                {% for error in form.phone.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.phone.label }}<br>
+                {{ form.phone(size=32) }}
+            </p>
+
+            <p>
+                {% for error in form.password.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.password.label }}<br>
+                {{ form.password(size=32) }}
+            </p>
+
+            <p>
+                {% for error in form.confirm.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.confirm.label }}<br>
+                {{ form.confirm(size=32) }}
+            </p>
+
+            <p>
+                {% for error in form.remember.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                {{ form.remember.label }}<br>
+                {{ form.remember(size=32) }}
+            </p>
+
+            <p>
+                {% for error in form.agree.errors %}
+                    <span style="color: red;">[{{ error }}]</span><br>
+                {% endfor %}
+                I have read and agree with the <a href="/terms" target="_blank">terms</a><br>
+                {{ form.agree(size=32) }}
+            </p>
+
+
+            <p>{{ form.submit() }}</p>
+
+            <a href="{{ login_url }}">Go back</a>
+        </form>
+
+    {% endif %}
+
 {% endblock %}

@@ -45,26 +45,55 @@ def register():
     """
     form = RegisterForm()
     challenge = request.args.get('challenge')
+    complete = False
 
     if not challenge:
         raise Exception("No challenge in form")
 
     if form.validate_on_submit():
-        registry.create(
+        user = registry.create(
             name=form.name.data,
             company=form.company.data,
             email=form.email.data,
             phone=form.phone.data,
             password=form.password.data,
         )
-        return redirect(url_for('login', login_challenge=challenge))
+
+        email_service.send_welcome_email(user, challenge)
+
+        complete = True
+        # return redirect(url_for('login', login_challenge=challenge))
 
     env = {
         'form': form,
+        'complete': complete,
         'login_url': url_for('login', login_challenge=challenge),
     }
 
     return render_template('register.html', **env)
+
+
+def verify_email():
+    """
+    TODO
+    """
+    challenge = request.args.get('challenge')
+    email = request.args.get('email')
+    activate_token = request.args.get('activate_token')
+    user = registry.get_user(email=email, activate_token=activate_token)
+
+    if not challenge:
+        raise Exception("No challenge in form")
+    if not email:
+        raise Exception("No email in args")
+    if not activate_token:
+        raise Exception("No activate_token in args")
+    if not user:
+        raise Exception("User not found")
+
+    registry.activate(user)
+
+    return redirect(url_for('login', login_challenge=challenge))
 
 
 def login():

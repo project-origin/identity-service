@@ -18,6 +18,7 @@ from .controllers import (
     login,
     consent,
     register,
+    verify_email,
     logout,
     terms,
     error_handler,
@@ -80,6 +81,7 @@ app.add_url_rule('/login', 'login', login, methods=['GET', 'POST'])
 app.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 app.add_url_rule('/consent', 'consent', consent, methods=['GET', 'POST'])
 app.add_url_rule('/register', 'register', register, methods=['GET', 'POST'])
+app.add_url_rule('/verify-email', 'verify-email', verify_email, methods=['GET'])
 app.add_url_rule('/terms', 'terms', terms, methods=['GET'])
 app.add_url_rule('/reset-password', 'reset-password', reset_password, methods=['GET', 'POST'])
 app.add_url_rule('/enter-verification-code', 'enter-verification-code', enter_verification_code, methods=['GET', 'POST'])
