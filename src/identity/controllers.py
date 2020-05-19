@@ -4,6 +4,7 @@ from flask import request, render_template, redirect, url_for, make_response
 
 from identity.registry import registry
 from identity.email import email_service
+from scopes import SCOPES
 from identity.forms import (
     LoginForm,
     RegisterForm,
@@ -219,8 +220,12 @@ def consent():
         res = _grant_consent(challenge, consent_request, user, true)
         return redirect(res.redirect_to)
 
-    # scopes = [SCOPES[s] for s in consent_request.requested_scope]
-    scopes = [s for s in consent_request.requested_scope]
+    scopes = []
+    for s in consent_request.requested_scope:
+        if s in SCOPES:
+            scopes.append(SCOPES[s])
+        else:
+            scopes.append(s)
 
     env = {
         'form': form,
