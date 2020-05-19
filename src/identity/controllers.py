@@ -4,7 +4,7 @@ from flask import request, render_template, redirect, url_for, make_response
 
 from identity.registry import registry
 from identity.email import email_service
-from scopes import SCOPES
+from identity.scopes import SCOPES
 from identity.forms import (
     LoginForm,
     RegisterForm,
