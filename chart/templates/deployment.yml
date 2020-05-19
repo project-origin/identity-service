@@ -26,6 +26,12 @@ spec:
                 name: identity-system-secret
             - secretRef:
                 name: identity-db-secret
+          env:
+            - name: TRUSTED_CLIENTS
+              valueFrom:
+                secretKeyRef:
+                  name: account-hydra-secret
+                  key: HYDRA_CLIENT_ID
 
           ports:
           - containerPort: 9120
