@@ -216,7 +216,7 @@ def consent():
         return redirect(res.redirect_to)
 
     # Is a trusted client.
-    if TRUSTED_CLIENTS and consent_request.client in TRUSTED_CLIENTS.split(';'):
+    if TRUSTED_CLIENTS and consent_request.client.client_id in TRUSTED_CLIENTS.split(';'):
         res = _grant_consent(challenge, consent_request, user, True)
         return redirect(res.redirect_to)
 
