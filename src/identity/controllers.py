@@ -17,7 +17,8 @@ from identity.settings import (
     HYDRA_URL,
     TOKEN_EXPIRE_MINUTES,
     FAILURE_REDIRECT_URL,
-    SECRET)
+    SECRET,
+    TRUSTED_CLIENTS)
 from identity.hydra import (
     Hydra,
     Session,
@@ -187,18 +188,9 @@ def consent():
         if form.grant.data:
             req = hydra.get_consent_request(challenge)
             user = registry.get_user(subject=req.subject)
-            res = hydra.accept_consent(challenge, GrantConsent(
-                grant_access_token_audience=req.requested_access_token_audience,
-                grant_scope=req.requested_scope,
-                handled_at=get_now_iso(),
-                remember=form.remember.data,
-                remember_for=TOKEN_EXPIRE_MINUTES*60,
-                session=Session(
-                    access_token={},
-                    id_token=user.id_token,
-                )
-            ))
+            res = _grant_consent(challenge, req, user, form.remember.data)
             return redirect(res.redirect_to)
+
         elif form.deny.data:
             res = hydra.reject_consent(challenge, RejectConcent(
                 error='consent_required',
@@ -219,18 +211,12 @@ def consent():
 
     # Already given consent (remembered)?
     if consent_request.skip:
-        req = hydra.get_consent_request(challenge)
-        res = hydra.accept_consent(challenge, GrantConsent(
-            grant_access_token_audience=req.requested_access_token_audience,
-            grant_scope=req.requested_scope,
-            handled_at=get_now_iso(),
-            remember=False,
-            remember_for=TOKEN_EXPIRE_MINUTES*60,
-            session=Session(
-                access_token={},
-                id_token=user.id_token,
-            )
-        ))
+        res = _grant_consent(challenge, consent_request, user, true)
+        return redirect(res.redirect_to)
+
+    # Is a trusted client.
+    if consent_request.client in TRUSTED_CLIENTS.split(';'):
+        res = _grant_consent(challenge, consent_request, user, true)
         return redirect(res.redirect_to)
 
     # scopes = [SCOPES[s] for s in consent_request.requested_scope]
@@ -245,6 +231,21 @@ def consent():
 
     return render_template('consent.html', **env)
 
+
+def _grant_consent(challenge, req, user, remember):
+    res = hydra.accept_consent(challenge, GrantConsent(
+        grant_access_token_audience=req.requested_access_token_audience,
+        grant_scope=req.requested_scope,
+        handled_at=get_now_iso(),
+        remember=remember,
+        remember_for=TOKEN_EXPIRE_MINUTES*60,
+        session=Session(
+            access_token={},
+            id_token=user.id_token,
+        )
+    ))
+    return res
+    
 
 # -- Reset/change password flow ----------------------------------------------
 
