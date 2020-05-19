@@ -4,6 +4,7 @@ from flask import request, render_template, redirect, url_for, make_response
 
 from identity.registry import registry
 from identity.email import email_service
+from identity.scopes import SCOPES
 from identity.forms import (
     LoginForm,
     RegisterForm,
@@ -17,7 +18,8 @@ from identity.settings import (
     HYDRA_URL,
     TOKEN_EXPIRE_MINUTES,
     FAILURE_REDIRECT_URL,
-    SECRET)
+    SECRET,
+    TRUSTED_CLIENTS)
 from identity.hydra import (
     Hydra,
     Session,
@@ -45,26 +47,55 @@ def register():
     """
     form = RegisterForm()
     challenge = request.args.get('challenge')
+    complete = False
 
     if not challenge:
         raise Exception("No challenge in form")
 
     if form.validate_on_submit():
-        registry.create(
+        user = registry.create(
             name=form.name.data,
             company=form.company.data,
             email=form.email.data,
             phone=form.phone.data,
             password=form.password.data,
         )
-        return redirect(url_for('login', login_challenge=challenge))
+
+        email_service.send_welcome_email(user, challenge)
+
+        complete = True
+        # return redirect(url_for('login', login_challenge=challenge))
 
     env = {
         'form': form,
+        'complete': complete,
         'login_url': url_for('login', login_challenge=challenge),
     }
 
     return render_template('register.html', **env)
+
+
+def verify_email():
+    """
+    TODO
+    """
+    challenge = request.args.get('challenge')
+    email = request.args.get('email')
+    activate_token = request.args.get('activate_token')
+    user = registry.get_user(email=email, activate_token=activate_token)
+
+    if not challenge:
+        raise Exception("No challenge in form")
+    if not email:
+        raise Exception("No email in args")
+    if not activate_token:
+        raise Exception("No activate_token in args")
+    if not user:
+        raise Exception("User not found")
+
+    registry.activate(user)
+
+    return redirect(url_for('login', login_challenge=challenge))
 
 
 def login():
@@ -158,18 +189,9 @@ def consent():
         if form.grant.data:
             req = hydra.get_consent_request(challenge)
             user = registry.get_user(subject=req.subject)
-            res = hydra.accept_consent(challenge, GrantConsent(
-                grant_access_token_audience=req.requested_access_token_audience,
-                grant_scope=req.requested_scope,
-                handled_at=get_now_iso(),
-                remember=form.remember.data,
-                remember_for=TOKEN_EXPIRE_MINUTES*60,
-                session=Session(
-                    access_token={},
-                    id_token=user.id_token,
-                )
-            ))
+            res = _grant_consent(challenge, req, user, form.remember.data)
             return redirect(res.redirect_to)
+
         elif form.deny.data:
             res = hydra.reject_consent(challenge, RejectConcent(
                 error='consent_required',
@@ -190,22 +212,20 @@ def consent():
 
     # Already given consent (remembered)?
     if consent_request.skip:
-        req = hydra.get_consent_request(challenge)
-        res = hydra.accept_consent(challenge, GrantConsent(
-            grant_access_token_audience=req.requested_access_token_audience,
-            grant_scope=req.requested_scope,
-            handled_at=get_now_iso(),
-            remember=False,
-            remember_for=TOKEN_EXPIRE_MINUTES*60,
-            session=Session(
-                access_token={},
-                id_token=user.id_token,
-            )
-        ))
+        res = _grant_consent(challenge, consent_request, user, True)
         return redirect(res.redirect_to)
 
-    # scopes = [SCOPES[s] for s in consent_request.requested_scope]
-    scopes = [s for s in consent_request.requested_scope]
+    # Is a trusted client.
+    if TRUSTED_CLIENTS and consent_request.client.client_id in TRUSTED_CLIENTS.split(';'):
+        res = _grant_consent(challenge, consent_request, user, True)
+        return redirect(res.redirect_to)
+
+    scopes = []
+    for s in consent_request.requested_scope:
+        if s in SCOPES:
+            scopes.append(SCOPES[s])
+        else:
+            scopes.append(s)
 
     env = {
         'form': form,
@@ -216,6 +236,21 @@ def consent():
 
     return render_template('consent.html', **env)
 
+
+def _grant_consent(challenge, req, user, remember):
+    res = hydra.accept_consent(challenge, GrantConsent(
+        grant_access_token_audience=req.requested_access_token_audience,
+        grant_scope=req.requested_scope,
+        handled_at=get_now_iso(),
+        remember=remember,
+        remember_for=TOKEN_EXPIRE_MINUTES*60,
+        session=Session(
+            access_token={},
+            id_token=user.id_token,
+        )
+    ))
+    return res
+    
 
 # -- Reset/change password flow ----------------------------------------------
 
