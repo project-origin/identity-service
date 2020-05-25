@@ -27,7 +27,7 @@ STATIC_DIR = os.path.join(SOURCE_DIR, 'static')
 # -- Database ----------------------------------------------------------------
 
 SQL_ALCHEMY_SETTINGS = {
-    'echo': DEBUG,
+    'echo': False,
     'pool_pre_ping': True,
     'pool_size': int(os.environ['DATABASE_CONN_POLL_SIZE']),
 }
