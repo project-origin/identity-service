@@ -16,7 +16,7 @@ from identity.forms import (
 )
 from identity.settings import (
     HYDRA_URL,
-    TOKEN_EXPIRE_MINUTES,
+    TOKEN_EXPIRE_SECONDS,
     FAILURE_REDIRECT_URL,
     SECRET,
     TRUSTED_CLIENTS)
@@ -116,13 +116,13 @@ def login():
         res = hydra.accept_login(challenge, LoginAccept(
             subject=login_request.subject,
             remember=login_request.skip,
-            remember_for=TOKEN_EXPIRE_MINUTES,
+            remember_for=TOKEN_EXPIRE_SECONDS,
         ))
 
         # The token is used when editing profile or changing password
         token = jwt.encode({'subject': login_request.subject}, SECRET, algorithm='HS256')
         response = make_response(redirect(res.redirect_to))
-        response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_MINUTES*60)
+        response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_SECONDS)
         return response
 
     # Login form submitted and validated correctly?
@@ -139,13 +139,13 @@ def login():
             res = hydra.accept_login(challenge, LoginAccept(
                 subject=user.subject,
                 remember=form.remember.data,
-                remember_for=TOKEN_EXPIRE_MINUTES
+                remember_for=TOKEN_EXPIRE_SECONDS
             ))
 
             # The token is used when editing profile or changing password
             token = jwt.encode({'subject': user.subject}, SECRET, algorithm='HS256')
             response = make_response(redirect(res.redirect_to))
-            response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_MINUTES*60)
+            response.set_cookie(TOKEN_COOKIE_NAME, token, max_age=TOKEN_EXPIRE_SECONDS)
             return response
 
     env = {
@@ -243,7 +243,7 @@ def _grant_consent(challenge, req, user, remember):
         grant_scope=req.requested_scope,
         handled_at=get_now_iso(),
         remember=remember,
-        remember_for=TOKEN_EXPIRE_MINUTES*60,
+        remember_for=TOKEN_EXPIRE_SECONDS,
         session=Session(
             access_token={},
             id_token=user.id_token,
