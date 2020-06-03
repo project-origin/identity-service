@@ -53,7 +53,7 @@ spec:
 
       initContainers:
         - name: hydra-migrate-container
-          image: oryd/hydra:v1.4.8
+          image: oryd/hydra:v1.5.0
           args: ['migrate', 'sql', '--yes', '--read-from-env']
           env:
             - name: 'DSN'
@@ -64,7 +64,7 @@ spec:
 
       containers:
         - name: hydra-container
-          image: oryd/hydra:v1.4.8
+          image: oryd/hydra:v1.5.0
           args: ['serve', 'all', '--dangerous-force-http']
           ports:
             - containerPort: 4444
