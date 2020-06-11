@@ -16,6 +16,7 @@ spec:
       containers:
         - name: identity-container
           image: projectorigin/identity-service:{{ .Values.tag }}
+          imagePullPolicy: Always
           
           envFrom:
             - configMapRef:
