@@ -16,7 +16,6 @@ spec:
       containers:
         - name: identity-container
           image: projectorigin/identity-service:{{ .Values.tag }}
-          
           envFrom:
             - configMapRef:
                 name: namespace-config
