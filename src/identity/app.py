@@ -5,7 +5,7 @@ from opencensus.trace import config_integration
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.trace_exporter import AzureExporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.trace.samplers import ProbabilitySampler
+from opencensus.trace.samplers import AlwaysOnSampler
 
 from .settings import (
     SECRET,
@@ -67,9 +67,12 @@ if AZURE_APP_INSIGHTS_CONN_STRING:
 
     exporter = AzureExporter(connection_string=AZURE_APP_INSIGHTS_CONN_STRING)
     exporter.add_telemetry_processor(__telemetry_processor)
-    sampler = ProbabilitySampler(1.0)
 
-    opencensus = FlaskMiddleware(app, sampler=sampler, exporter=exporter)
+    FlaskMiddleware(
+        app=app,
+        sampler=AlwaysOnSampler(),
+        exporter=exporter,
+    )
 
 
 csrf = CSRFProtect(app)
