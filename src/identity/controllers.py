@@ -35,7 +35,8 @@ LOGIN_ERROR_MSG = 'The email / password combination is not correct'
 EMAIL_ERROR_MSG = 'E-mail was not recognized'
 VERIFICATION_CODE_ERROR_MSG = 'Wrong verification code'
 VERIFICATION_CODE_EMAIL_ERROR_MSG = 'Wrong e-mail or verification code'
-PASSWORD_CONFIRM_ERROR_MSG = 'The two passwords did not match'
+PASSWORD_CHANGE_DID_NOT_MATCH = 'The two passwords did not match'
+PASSWORD_CHANGE_CURRENT_PASSWORD_INCORRECT = 'Current password was incorrect'
 
 
 hydra = Hydra(HYDRA_URL)
@@ -369,7 +370,7 @@ def change_password():
         error = VERIFICATION_CODE_EMAIL_ERROR_MSG
     elif form.validate_on_submit():
         if form.password1.data != form.password2.data:
-            error = PASSWORD_CONFIRM_ERROR_MSG
+            error = PASSWORD_CHANGE_DID_NOT_MATCH
         else:
             registry.assign_password(user, form.password1.data)
             complete = True
@@ -394,20 +395,43 @@ def edit_profile():
     token = request.cookies.get(TOKEN_COOKIE_NAME)
     token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
     user = registry.get_user(subject=token_decoded['subject'])
+    return_url = request.args.get('return_url')
+    form = EditProfileForm()
+    password_error = None
 
     if not user:
         raise Exception("Subject not found")
-
-    form = EditProfileForm()
-    return_url = request.args.get('return_url')
-    error = None
-
     if not return_url:
         raise Exception("No return_url in args")
 
+    if not form.is_submitted():
+        form.name.data = user.name
+        form.company.data = user.company
+        form.phone.data = user.phone
+
+    def __validate_change_password():
+        hashed_current_password = registry.password_hash(
+            form.current_password.data)
+        if hashed_current_password != user.password:
+            return PASSWORD_CHANGE_CURRENT_PASSWORD_INCORRECT
+        elif form.password1.data != form.password2.data:
+            return PASSWORD_CHANGE_DID_NOT_MATCH
+
     # Form submitted and validated correctly?
-    if form.is_submitted():
-        if form.validate():
+    if form.is_submitted() and form.validate():
+        is_changing_password = (
+            form.current_password.data
+            or form.password1.data
+            or form.password1.data
+        )
+
+        if is_changing_password:
+            password_error = __validate_change_password()
+
+        if not password_error:
+            if is_changing_password:
+                registry.assign_password(user, form.password1.data)
+
             registry.update_details(user, **{
                 'name': form.name.data,
                 'company': form.company.data,
@@ -415,14 +439,10 @@ def edit_profile():
             })
 
             return redirect(return_url)
-    else:
-        form.name.data = user.name
-        form.company.data = user.company
-        form.phone.data = user.phone
 
     env = {
         'form': form,
-        'error': error,
+        'password_error': password_error,
         'return_url': return_url,
     }
 

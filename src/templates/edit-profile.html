@@ -31,6 +31,43 @@
             {{ form.phone(size=32) }}
         </p>
 
+
+        <br><hr><br>
+
+
+        <h2>Change password</h2>
+        <p>
+            Leave these fields empty to keep your current password.
+        </p>
+
+        {% if password_error %}
+            <span style="color: red;">[{{ password_error }}]</span><br>
+        {% endif %}
+
+        <p>
+            {% for error in form.current_password.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.current_password.label }}<br>
+            {{ form.current_password(size=32) }}
+        </p>
+        <p>
+            {% for error in form.password1.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.password1.label }}<br>
+            {{ form.password1(size=32) }}
+        </p>
+        <p>
+            {% for error in form.password2.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32) }}
+        </p>
+
+        <br>
+
         <p>{{ form.submit() }}</p>
 
         <a href="{{ return_url }}">Go back</a>
