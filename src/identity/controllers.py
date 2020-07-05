@@ -343,8 +343,8 @@ def enter_verification_code():
 
 def change_password():
     """
-    User enters the verification code sent to their e-mail.
-    Redirects to "change-password" view afterwards.
+    Enter new password ONLY as part of reset-password flow,
+    not directly (when logged in).
     """
     form = ChangePasswordForm()
     challenge = request.args.get('challenge')
