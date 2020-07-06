@@ -67,8 +67,32 @@ class ChangePasswordForm(FlaskForm):
 # -- Edit profile flow -------------------------------------------------------
 
 
+class LengthIf(Length):
+    """
+    A 'Length' validator which only performs validation if any of
+    the [other] form fields has a truthy value, ie. length is optional
+    if none of the fields has a value.
+    """
+    def __init__(self, other_field_names, *args, **kwargs):
+        self.other_field_names = other_field_names
+        super(LengthIf, self).__init__(*args, **kwargs)
+
+    def __call__(self, form, field):
+        for other_field_name in self.other_field_names:
+            other_field = form._fields.get(other_field_name)
+
+            if other_field is None:
+                raise RuntimeError('No field named "%s" in form' % other_field_name)
+
+            if bool(other_field.data):
+                super(LengthIf, self).__call__(form, field)
+
+
 class EditProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     company = StringField('Company name', validators=[DataRequired()])
     phone = StringField('Phone', validators=[DataRequired()])
-    submit = SubmitField('Save')
+    current_password = PasswordField('Current password', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
+    password1 = PasswordField('New password', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
+    password2 = PasswordField('New password (confirm)', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
+    submit = SubmitField('Save profile')
