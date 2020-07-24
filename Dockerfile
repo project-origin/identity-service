@@ -6,7 +6,7 @@ COPY Pipfile.lock /app
 WORKDIR /app
 RUN apt-get update
 RUN pip3 install --upgrade setuptools pip pipenv
-RUN pipenv install
+RUN pipenv sync
 RUN chmod +x /app/entrypoint.sh
 EXPOSE 9120
 CMD ["./entrypoint.sh"]
