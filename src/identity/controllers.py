@@ -27,7 +27,7 @@ from identity.hydra import (
     Session,
     LoginAccept,
     GrantConsent,
-    RejectConcent,
+    RejectConsent,
 )
 
 
@@ -196,7 +196,7 @@ def consent():
             return redirect(res.redirect_to)
 
         elif form.deny.data:
-            res = hydra.reject_consent(challenge, RejectConcent(
+            res = hydra.reject_consent(challenge, RejectConsent(
                 error='consent_required',
                 error_debug='User denied access to their data.',
                 error_description='User denied access to their data.',
