@@ -1,9 +1,13 @@
-from requests import get, put
-from dataclasses import dataclass, field
+from marshmallow import EXCLUDE
+from requests import get, put, delete
+from dataclasses import dataclass
 from typing import List, Dict
 from marshmallow_dataclass import class_schema
 from datetime import datetime
 from urllib.parse import urlencode
+
+from identity.scopes import SCOPES
+from identity.settings import HYDRA_URL
 
 
 @dataclass
@@ -32,6 +36,9 @@ class Client:
     userinfo_signed_response_alg: str
     audience: List[str]
 
+    class Meta:
+        unknown = EXCLUDE
+
 
 @dataclass
 class BaseRequest:
@@ -43,10 +50,20 @@ class BaseRequest:
     skip: bool
     subject: str
 
+    class Meta:
+        unknown = EXCLUDE
+
+    @property
+    def scopes_readable(self) -> List[str]:
+        return [SCOPES.get(s, s) for s in self.requested_scope]
+
 
 @dataclass
 class LoginRequest(BaseRequest):
     session_id: str
+
+    class Meta:
+        unknown = EXCLUDE
 
 
 @dataclass
@@ -55,11 +72,17 @@ class ConsentRequest(BaseRequest):
     login_challenge: str
     login_session_id: str
 
+    class Meta:
+        unknown = EXCLUDE
+
 
 @dataclass
 class Session:
     access_token: Dict[str, str]
     id_token: Dict[str, str]
+
+    class Meta:
+        unknown = EXCLUDE
 
 
 @dataclass
@@ -71,12 +94,18 @@ class GrantConsent:
     remember_for: int
     session: Session
 
+    class Meta:
+        unknown = EXCLUDE
+
 
 @dataclass
 class LoginAccept:
     subject: str
     remember: bool
     remember_for: int
+
+    class Meta:
+        unknown = EXCLUDE
 
 
 @dataclass
@@ -87,10 +116,46 @@ class RejectConsent:
     error_hint: str
     status_code: int
 
+    class Meta:
+        unknown = EXCLUDE
+
 
 @dataclass
 class RedirectResponse:
     redirect_to: str
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+@dataclass
+class ConsentClient:
+    client_id: str
+    client_name: str
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+@dataclass
+class Consent:
+    grant_scope: List[str]
+    consent_request: ConsentRequest
+
+    class Meta:
+        unknown = EXCLUDE
+
+    @property
+    def client_name(self) -> str:
+        return self.consent_request.client.client_name
+
+    @property
+    def client_id(self) -> str:
+        return self.consent_request.client.client_id
+
+    @property
+    def scopes_readable(self) -> List[str]:
+        return [SCOPES.get(s, s) for s in self.grant_scope]
 
 
 # Schema instances
@@ -103,6 +168,8 @@ login_accept_schema = class_schema(LoginAccept)()
 
 consent_request_schema = class_schema(ConsentRequest)(unknown="EXCLUDE")
 grant_consent_schema = class_schema(GrantConsent)(unknown="EXCLUDE")
+
+consent_schema = class_schema(Consent)(unknown="EXCLUDE")
 
 
 class HydraException(Exception):
@@ -163,6 +230,19 @@ class Hydra:
         else:
             raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
 
+    def get_consents(self, subject: str) -> List[Consent]:
+        url = f'{self.url}/oauth2/auth/sessions/consent'
+        headers = {'Content-Type': 'application/json'}
+        params = {'subject': subject}
+
+        response = get(url, headers=headers, params=params, verify=False)
+
+        if response.status_code == 200:
+            print(f'\n\n{response.content}\n\n')
+            return consent_schema.loads(response.content, many=True)
+        else:
+            raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
     def get_consent_request(self, challenge: str) -> ConsentRequest:
         query = urlencode({'consent_challenge': challenge})
         url = f'{self.url}/oauth2/auth/requests/consent?{query}'
@@ -199,3 +279,16 @@ class Hydra:
             return redirect_schema.loads(response.content)
         else:
             raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
+    def revoke_consent(self, subject: str, client_id: str) -> List[Consent]:
+        url = f'{self.url}/oauth2/auth/sessions/consent'
+        headers = {'Content-Type': 'application/json'}
+        params = {'subject': subject, 'client': client_id}
+
+        response = delete(url, headers=headers, params=params, verify=False)
+
+        if response.status_code != 204:
+            raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
+
+hydra = Hydra(HYDRA_URL)

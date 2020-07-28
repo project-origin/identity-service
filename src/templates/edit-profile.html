@@ -5,6 +5,14 @@
 {% endblock %}
 
 {% block content %}
+    <script>
+        function revokeConsent(clientName, clientId) {
+            if(confirm('Revoke all permissions granted to ' + clientName + '?')) {
+                document.location = '{{ revoke_consent_url }}&client_id=' + clientId;
+            }
+        }
+    </script>
+
     <h1>Edit profile</h1>
     <form action="" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -69,6 +77,34 @@
         <br>
 
         <p>{{ form.submit() }}</p>
+
+
+        <br><hr><br>
+
+
+        <h1>Consents granted</h1>
+        <p>
+            The following clients have been granted the listed permissions:
+        </p>
+
+        {% for consent in consents %}
+            <h2>{{ consent.client_name }}</h2>
+            {% for scope in consent.scopes_readable %}
+              {{scope}}
+              <hr>
+            {%endfor%}
+
+            <p>
+                <input type="button"
+                      value="REVOKE THIS CONSENT"
+                      style="color: red"
+                      onclick="revokeConsent('{{ consent.client_name }}', '{{ consent.client_id }}')">
+            </p>
+          <br><br>
+        {%endfor%}
+
+
+        <br><br>
 
         <a href="{{ return_url }}">Go back</a>
     </form>
