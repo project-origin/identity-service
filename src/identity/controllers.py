@@ -234,7 +234,7 @@ def _grant_consent(challenge, req, user, remember):
         grant_scope=req.requested_scope,
         handled_at=get_now_iso(),
         remember=remember,
-        remember_for=CONSENT_EXPIRE_SECONDS,
+        remember_for=TOKEN_EXPIRE_SECONDS,
         session=Session(
             access_token={},
             id_token=user.id_token,
