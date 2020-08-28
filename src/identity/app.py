@@ -1,5 +1,7 @@
 import logging
-from flask import Flask
+import os
+
+from flask import Flask, send_from_directory
 from flask_wtf.csrf import CSRFProtect
 from opencensus.trace import config_integration
 from opencensus.ext.azure.log_exporter import AzureLogHandler
@@ -26,6 +28,7 @@ from .controllers import (
     enter_verification_code,
     change_password,
     edit_profile,
+    revoke_consent,
 )
 
 # Import models here for SQLAlchemy to detect them
@@ -80,6 +83,7 @@ csrf = CSRFProtect(app)
 
 # -- URLs/routes setup -------------------------------------------------------
 
+
 app.add_url_rule('/login', 'login', login, methods=['GET', 'POST'])
 app.add_url_rule('/logout', 'logout', logout, methods=['GET'])
 app.add_url_rule('/consent', 'consent', consent, methods=['GET', 'POST'])
@@ -90,5 +94,6 @@ app.add_url_rule('/reset-password', 'reset-password', reset_password, methods=['
 app.add_url_rule('/enter-verification-code', 'enter-verification-code', enter_verification_code, methods=['GET', 'POST'])
 app.add_url_rule('/change-password', 'change-password', change_password, methods=['GET', 'POST'])
 app.add_url_rule('/edit-profile', 'edit-profile', edit_profile, methods=['GET', 'POST'])
+app.add_url_rule('/revoke-consent', 'revoke-consent', revoke_consent, methods=['GET', 'POST'])
 app.register_error_handler(404, error_handler)
 app.register_error_handler(500, error_handler)
