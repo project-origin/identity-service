@@ -304,7 +304,7 @@ class Hydra:
             'client_secret': client_secret,
             'redirect_to': client_callback,
             'redirect_uris': [client_callback],
-            'scope': ','.join(HYDRA_WANTED_SCOPES),
+            'scope': ' '.join(HYDRA_WANTED_SCOPES),
             'grant_types': ['authorization_code', 'refresh_token'],
             'response_types': ['token', 'code', 'id_token'],
         })
