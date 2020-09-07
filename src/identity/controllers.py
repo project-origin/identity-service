@@ -1,5 +1,6 @@
 import jwt
 from datetime import datetime, timezone
+
 from flask import request, render_template, redirect, url_for, make_response
 
 from identity.registry import registry
@@ -12,6 +13,7 @@ from identity.forms import (
     EnterVerificationCodeForm,
     ChangePasswordForm,
     EditProfileForm,
+    CreateOauth2ClientForm,
 )
 from identity.settings import (
     TOKEN_EXPIRE_SECONDS,
@@ -19,6 +21,7 @@ from identity.settings import (
     SECRET,
     TRUSTED_CLIENTS,
     CONSENT_EXPIRE_SECONDS,
+    DEBUG,
 )
 from identity.hydra import (
     hydra,
@@ -465,6 +468,78 @@ def revoke_consent():
     return redirect(url_for('edit-profile', return_url=return_url))
 
 
+# -- Create/delete OAUTH2 clients flow ---------------------------------------
+
+
+def show_oauth2_clients():
+    """
+    TODO
+    """
+    token = request.cookies.get(TOKEN_COOKIE_NAME)
+    token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
+    subject = token_decoded['subject']
+    user = registry.get_user(subject=subject)
+    return_url = request.args.get('return_url')
+    create_client_form = CreateOauth2ClientForm()
+
+    if user is None:
+        raise Exception("Subject not found")
+    if not return_url:
+        raise Exception("No return_url in args")
+
+    # Form submitted and validated correctly?
+    if create_client_form.validate_on_submit():
+        hydra.create_oauth2_client(
+            owner=subject,
+            client_id=create_client_form.id.data,
+            client_name=create_client_form.name.data,
+            client_secret=create_client_form.secret.data,
+            client_callback=create_client_form.callback.data,
+        )
+
+        return redirect(url_for('clients', return_url=return_url))
+
+    clients = hydra.get_oauth2_clients()
+    clients_filtered = [c for c in clients if c['owner'] == subject]
+
+    env = {
+        'clients': clients_filtered,
+        'return_url': return_url,
+        'create_client_form': create_client_form,
+        'delete_client_url': url_for('delete-client', return_url=return_url),
+    }
+
+    return render_template('clients.html', **env)
+
+
+def delete_client():
+    """
+    TODO
+    """
+    token = request.cookies.get(TOKEN_COOKIE_NAME)
+    token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
+    subject = token_decoded['subject']
+    client_id = request.args.get('client_id')
+    return_url = request.args.get('return_url')
+
+    if not client_id:
+        raise Exception("No client_id in args")
+    if not return_url:
+        raise Exception("No return_url in args")
+
+    # All clients owned by all users
+    all_clients = hydra.get_oauth2_clients()
+
+    # All clients owned by current subject
+    users_clients = [c for c in all_clients if c['owner'] == subject]
+    users_clients_mapped = {c['client_id']: c for c in users_clients}
+
+    if client_id in users_clients_mapped:
+        hydra.delete_oauth2_client(client_id)
+
+    return redirect(url_for('clients', return_url=return_url))
+
+
 # -- Misc --------------------------------------------------------------------
 
 
@@ -479,7 +554,10 @@ def error_handler(e=None):
     """
     :rtype: flask.Response
     """
-    return redirect(FAILURE_REDIRECT_URL)
+    if DEBUG:
+        raise e
+    else:
+        return redirect(FAILURE_REDIRECT_URL)
 
 
 def get_now_iso():

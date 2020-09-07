@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.orm import relationship
 
 from .db import ModelBase
 
@@ -44,6 +45,32 @@ class User(ModelBase):
             'name': self.name,
             'company': self.company,
         }
+
+
+# class OauthClient(ModelBase):
+#     """
+#     Represents one 3rd party client.
+#     """
+#     __tablename__ = 'client'
+#     __table_args__ = (
+#         sa.UniqueConstraint('client_id'),
+#     )
+#
+#     id = sa.Column(sa.Integer, primary_key=True, index=True)
+#     created = sa.Column(sa.DateTime(timezone=True), server_default=sa.func.now())
+#
+#     # Hydra Subject ID
+#     user_id = sa.Column(sa.Integer(), sa.ForeignKey('user.id'), index=True, nullable=False)
+#     user = relationship('User', foreign_keys=[user_id])
+#
+#     # Details
+#     client_id = sa.Column(sa.String(), index=True, nullable=False)
+#     client_name = sa.Column(sa.String(), nullable=False)
+#     callback = sa.Column(sa.String(), nullable=False)
+#
+#     def __str__(self):
+#         return 'OauthClient<%s>' % self.client_id
+
 
 
 VERSIONED_DB_MODELS = (

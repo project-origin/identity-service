@@ -29,6 +29,8 @@ from .controllers import (
     change_password,
     edit_profile,
     revoke_consent,
+    show_oauth2_clients,
+    delete_client,
 )
 
 # Import models here for SQLAlchemy to detect them
@@ -95,5 +97,7 @@ app.add_url_rule('/enter-verification-code', 'enter-verification-code', enter_ve
 app.add_url_rule('/change-password', 'change-password', change_password, methods=['GET', 'POST'])
 app.add_url_rule('/edit-profile', 'edit-profile', edit_profile, methods=['GET', 'POST'])
 app.add_url_rule('/revoke-consent', 'revoke-consent', revoke_consent, methods=['GET', 'POST'])
+app.add_url_rule('/clients', 'clients', show_oauth2_clients, methods=['GET', 'POST'])
+app.add_url_rule('/clients/delete', 'delete-client', delete_client, methods=['GET'])
 app.register_error_handler(404, error_handler)
 app.register_error_handler(500, error_handler)

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit profile
+{% endblock %}
+
+{% block content %}
+    <script>
+        function deleteClient(clientName, clientId) {
+            if(confirm('Delete client "' + clientName + '"?\n\nThe operation can NOT be undone!')) {
+                document.location = '{{ delete_client_url }}&client_id=' + clientId;
+            }
+        }
+    </script>
+
+    <h1>My 3rd party clients</h1>
+    <p>
+        This feature allows you to create a 3rd party client
+        and integrate it with Project Origin.
+    </p>
+
+
+    <br><hr><br>
+
+
+    <h2>My clients</h2>
+
+    {% if not clients %}
+        <p>You have not created any clients</p>
+    {% else %}
+        <table width="100%" cellpadding="8">
+            <tr>
+                <td><b>ID</b></td>
+                <td><b>Name</b></td>
+                <td><b>Callback</b></td>
+            </tr>
+            {% for client in clients %}
+                <tr style="background: {{ loop.cycle('#F1F1F1', '#FFF') }}">
+                    <td>{{ client.client_id }}</td>
+                    <td>{{ client.client_name }}</td>
+                    <td>{{ client.redirect_uris.0 }}</td>
+                    <td>
+                        <a href="javascript:void(0)"
+                           onclick="deleteClient('{{ client.client_name }}', '{{ client.client_id }}')">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+
+
+    <br><hr><br>
+
+
+    <form action="" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <h2>Create new client</h2>
+        <p>
+            IMPORTANT:
+        </p>
+
+        <p>
+            {% for error in create_client_form.id.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ create_client_form.id.label }}<br>
+            {{ create_client_form.id(size=32) }}
+        </p>
+        <p>
+            {% for error in create_client_form.name.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ create_client_form.name.label }}<br>
+            {{ create_client_form.name(size=32) }}
+        </p>
+        <p>
+            {% for error in create_client_form.secret.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ create_client_form.secret.label }}<br>
+            {{ create_client_form.secret(size=32) }}
+        </p>
+        <p>
+            {% for error in create_client_form.callback.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{ create_client_form.callback.label }}<br>
+            {{ create_client_form.callback(size=32) }}
+        </p>
+
+        <p>{{ create_client_form.submit() }}</p>
+    </form>
+
+
+    <br><hr><br>
+
+
+    <a href="{{ return_url }}">Go back</a>
+
+{% endblock %}
