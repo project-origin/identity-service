@@ -96,3 +96,14 @@ class EditProfileForm(FlaskForm):
     password1 = PasswordField('New password', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
     password2 = PasswordField('New password (confirm)', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
     submit = SubmitField('Save profile')
+
+
+# -- Create/delete OAUTH2 clients flow ---------------------------------------
+
+
+class CreateOauth2ClientForm(FlaskForm):
+    id = StringField('Client ID', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    secret = StringField('Secret', validators=[DataRequired()])
+    callback = StringField('Callback URL', validators=[DataRequired()])
+    submit = SubmitField('Create client')
