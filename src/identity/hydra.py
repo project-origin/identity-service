@@ -1,5 +1,7 @@
+import json
+
 from marshmallow import EXCLUDE
-from requests import get, put, delete
+from requests import get, put, post, delete
 from dataclasses import dataclass
 from typing import List, Dict
 from marshmallow_dataclass import class_schema
@@ -7,7 +9,7 @@ from datetime import datetime
 from urllib.parse import urlencode
 
 from identity.scopes import SCOPES
-from identity.settings import HYDRA_URL
+from identity.settings import HYDRA_URL, HYDRA_WANTED_SCOPES
 
 
 @dataclass
@@ -288,6 +290,51 @@ class Hydra:
         response = delete(url, headers=headers, params=params, verify=False)
 
         if response.status_code != 204:
+            raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
+    # -- Management endpoints ------------------------------------------------
+
+    def create_oauth2_client(self, owner, client_id, client_name, client_secret, client_callback):
+        url = f'{self.url}/clients'
+        headers = {'Content-Type': 'application/json'}
+        data = json.dumps({
+            'owner': owner,
+            'client_id': client_id,
+            'client_name': client_name,
+            'client_secret': client_secret,
+            'redirect_to': client_callback,
+            'redirect_uris': [client_callback],
+            'scope': ' '.join(HYDRA_WANTED_SCOPES),
+            'grant_types': ['authorization_code', 'refresh_token'],
+            'response_types': ['token', 'code', 'id_token'],
+        })
+
+        response = post(url, data=data, headers=headers, verify=False)
+
+        if response.status_code != 201:
+            raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
+    def get_oauth2_clients(self):
+        query = urlencode({
+            'offset': 0,
+            'limit': 99999,
+        })
+
+        url = f'{self.url}/clients?{query}'
+
+        response = get(url, verify=False)
+
+        if response.status_code == 200:
+            return json.loads(response.content)
+        else:
+            raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
+
+    def delete_oauth2_client(self, client_id):
+        url = f'{self.url}/clients/{client_id}'
+
+        response = delete(url, verify=False)
+
+        if response.status_code not in (200, 204):
             raise HydraException(f'{response.status_code} from server: {response.content.decode()}')
 
 
