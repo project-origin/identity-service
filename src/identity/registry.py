@@ -61,7 +61,7 @@ class UserRegistry(object):
         filters = (
             User.email == self.normalize_email(email),
             User.password == self.password_hash(password),
-            User.active == True,
+            User.active.is_(True),
         )
 
         return session.query(User) \
