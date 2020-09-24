@@ -64,4 +64,8 @@ AZURE_APP_INSIGHTS_CONN_STRING = os.environ.get(
 EMAIL_FROM_NAME = os.environ['EMAIL_FROM_NAME']
 EMAIL_FROM_ADDRESS = os.environ['EMAIL_FROM_ADDRESS']
 SENDGRID_API_KEY = os.environ['SENDGRID_API_KEY']
-TRUSTED_CLIENT_IDS = [c for c in os.environ.get('TRUSTED_CLIENTS', '').split(';') if c]
+TRUSTED_CLIENT_IDS = []
+
+for key in os.environ:
+    if key.startswith('TRUSTED_CLIENT_'):
+        TRUSTED_CLIENT_IDS.append(os.environ[key])

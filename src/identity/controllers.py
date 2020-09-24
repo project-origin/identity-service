@@ -437,7 +437,8 @@ def edit_profile():
 
     env = {
         'form': form,
-        'consents': hydra.get_consents(subject),
+        'consents': [c for c in hydra.get_consents(subject)
+                     if c.client_id not in TRUSTED_CLIENT_IDS],
         'password_error': password_error,
         'revoke_consent_url': url_for('revoke-consent', return_url=return_url),
         'return_url': return_url,
