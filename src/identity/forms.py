@@ -98,6 +98,14 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField('Save profile')
 
 
+# -- Disable user ------------------------------------------------------------
+
+
+class DisableUserForm(FlaskForm):
+    disable = SubmitField('Disable account')
+    cancel = SubmitField('Cancel')
+
+
 # -- Create/delete OAUTH2 clients flow ---------------------------------------
 
 

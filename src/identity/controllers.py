@@ -13,6 +13,7 @@ from identity.forms import (
     EnterVerificationCodeForm,
     ChangePasswordForm,
     EditProfileForm,
+    DisableUserForm,
     CreateOauth2ClientForm,
 )
 from identity.settings import (
@@ -443,6 +444,37 @@ def edit_profile():
     }
 
     return render_template('edit-profile.html', **env)
+
+
+def disable_user():
+    """
+    TODO
+    """
+    token = request.cookies.get(TOKEN_COOKIE_NAME)
+    token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
+    subject = token_decoded['subject']
+    user = registry.get_user(subject=subject)
+    return_url = request.args.get('return_url')
+    form = DisableUserForm()
+
+    if not user:
+        raise Exception("Subject not found")
+    if not return_url:
+        raise Exception("No return_url in args")
+
+    if form.is_submitted():
+        if form.disable.data:
+            registry.disable_user(user)
+            return redirect(f'{return_url}?&disable=1')
+        else:
+            return redirect(return_url)
+
+    env = {
+        'form': form,
+        'return_url': return_url,
+    }
+
+    return render_template('disable-user.html', **env)
 
 
 def revoke_consent():
