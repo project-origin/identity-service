@@ -20,7 +20,7 @@ from identity.settings import (
     TOKEN_EXPIRE_SECONDS,
     FAILURE_REDIRECT_URL,
     SECRET,
-    TRUSTED_CLIENTS,
+    TRUSTED_CLIENT_IDS,
     CONSENT_EXPIRE_SECONDS,
     DEBUG,
 )
@@ -218,7 +218,7 @@ def consent():
         return redirect(res.redirect_to)
 
     # Is a trusted client.
-    if TRUSTED_CLIENTS and consent_request.client.client_id in TRUSTED_CLIENTS.split(';'):
+    if consent_request.client.client_id in TRUSTED_CLIENT_IDS:
         res = _grant_consent(challenge, consent_request, user, True)
         return redirect(res.redirect_to)
 
