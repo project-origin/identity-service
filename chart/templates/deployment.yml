@@ -31,18 +31,17 @@ spec:
                 secretKeyRef:
                   name: account-hydra-secret
                   key: HYDRA_CLIENT_ID
-             - name: TRUSTED_CLIENT_EXAMPLE_BACKEND
-               valueFrom:
-                 secretKeyRef:
-                   name: example-backend-hydra-secret
-                   key: HYDRA_CLIENT_ID
-
+            - name: TRUSTED_CLIENT_EXAMPLE_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: example-backend-hydra-secret
+                  key: HYDRA_CLIENT_ID
           ports:
             - containerPort: 9120
-#          resources:
-#            requests:
-#              memory: "100Mi"
-#              cpu: "500m"
-#            limits:
-#              memory: "500Mi"
-#              cpu: "1000m"
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "500m"
+            limits:
+              memory: "500Mi"
+              cpu: "1000m"
