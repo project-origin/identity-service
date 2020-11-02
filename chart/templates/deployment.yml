@@ -36,8 +36,9 @@ spec:
                  secretKeyRef:
                    name: example-backend-hydra-secret
                    key: HYDRA_CLIENT_ID
+
           ports:
-          - containerPort: 9120
+            - containerPort: 9120
 #          resources:
 #            requests:
 #              memory: "100Mi"
