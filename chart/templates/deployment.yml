@@ -38,10 +38,10 @@ spec:
                    key: HYDRA_CLIENT_ID
           ports:
           - containerPort: 9120
-          resources:
-            requests:
-              memory: "100Mi"
-              cpu: "500m"
-            limits:
-              memory: "500Mi"
-              cpu: "1000m"
+#          resources:
+#            requests:
+#              memory: "100Mi"
+#              cpu: "500m"
+#            limits:
+#              memory: "500Mi"
+#              cpu: "1000m"
