@@ -31,11 +31,11 @@ spec:
                 secretKeyRef:
                   name: account-hydra-secret
                   key: HYDRA_CLIENT_ID
-             - name: TRUSTED_CLIENT_EXAMPLE_BACKEND
-               valueFrom:
-                 secretKeyRef:
-                   name: example-backend-hydra-secret
-                   key: HYDRA_CLIENT_ID
+            - name: TRUSTED_CLIENT_EXAMPLE_BACKEND
+              valueFrom:
+                secretKeyRef:
+                  name: example-backend-hydra-secret
+                  key: HYDRA_CLIENT_ID
           ports:
           - containerPort: 9120
 #          resources:
