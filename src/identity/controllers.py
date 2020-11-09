@@ -13,13 +13,14 @@ from identity.forms import (
     EnterVerificationCodeForm,
     ChangePasswordForm,
     EditProfileForm,
+    DisableUserForm,
     CreateOauth2ClientForm,
 )
 from identity.settings import (
     TOKEN_EXPIRE_SECONDS,
     FAILURE_REDIRECT_URL,
     SECRET,
-    TRUSTED_CLIENTS,
+    TRUSTED_CLIENT_IDS,
     CONSENT_EXPIRE_SECONDS,
     DEBUG,
 )
@@ -217,7 +218,7 @@ def consent():
         return redirect(res.redirect_to)
 
     # Is a trusted client.
-    if TRUSTED_CLIENTS and consent_request.client.client_id in TRUSTED_CLIENTS.split(';'):
+    if consent_request.client.client_id in TRUSTED_CLIENT_IDS:
         res = _grant_consent(challenge, consent_request, user, True)
         return redirect(res.redirect_to)
 
@@ -436,13 +437,45 @@ def edit_profile():
 
     env = {
         'form': form,
-        'consents': hydra.get_consents(subject),
+        'consents': [c for c in hydra.get_consents(subject)
+                     if c.client_id not in TRUSTED_CLIENT_IDS],
         'password_error': password_error,
         'revoke_consent_url': url_for('revoke-consent', return_url=return_url),
         'return_url': return_url,
     }
 
     return render_template('edit-profile.html', **env)
+
+
+def disable_user():
+    """
+    TODO
+    """
+    token = request.cookies.get(TOKEN_COOKIE_NAME)
+    token_decoded = jwt.decode(token, SECRET, algorithms=['HS256'], verify=True)
+    subject = token_decoded['subject']
+    user = registry.get_user(subject=subject)
+    return_url = request.args.get('return_url')
+    form = DisableUserForm()
+
+    if not user:
+        raise Exception("Subject not found")
+    if not return_url:
+        raise Exception("No return_url in args")
+
+    if form.is_submitted():
+        if form.disable.data:
+            registry.disable_user(user)
+            return redirect(f'{return_url}?&disable=1')
+        else:
+            return redirect(return_url)
+
+    env = {
+        'form': form,
+        'return_url': return_url,
+    }
+
+    return render_template('disable-user.html', **env)
 
 
 def revoke_consent():
