@@ -570,7 +570,9 @@ def delete_client():
     if client_id in users_clients_mapped:
         hydra.delete_oauth2_client(client_id)
 
-    return redirect(url_for('clients', return_url=return_url))
+    response = make_response(redirect(url_for('clients', return_url=return_url)))
+    response.delete_cookie(TOKEN_COOKIE_NAME)
+    return response
 
 
 # -- Misc --------------------------------------------------------------------
