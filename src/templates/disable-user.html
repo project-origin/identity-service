@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Close account
+{% endblock %}
+
+{% block content %}
+    <script>
+        function revokeConsent(clientName, clientId) {
+            if(confirm('Revoke all permissions granted to ' + clientName + '?')) {
+                document.location = '{{ revoke_consent_url }}&client_id=' + clientId;
+            }
+        }
+    </script>
+
+    <h1>Close account</h1>
+    <p>
+        Permanently close your account?
+    </p>
+
+    <form action="" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <p>
+            {{ form.disable() }}
+            {{ form.cancel() }}
+        </p>
+
+        <br><br>
+
+        <a href="{{ return_url }}">Go back</a>
+    </form>
+{% endblock %}

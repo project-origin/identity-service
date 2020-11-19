@@ -17,6 +17,7 @@ class User(ModelBase):
     id = sa.Column(sa.Integer, primary_key=True, index=True)
     created = sa.Column(sa.DateTime(timezone=True), server_default=sa.func.now())
     active = sa.Column(sa.Boolean(), default=False, nullable=False)
+    disabled = sa.Column(sa.Boolean(), default=False, nullable=False)
 
     # Hydra Subject ID
     subject = sa.Column(sa.String(), index=True, nullable=False)
