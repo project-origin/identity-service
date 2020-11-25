@@ -33,7 +33,7 @@ class RegisterForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    email = StringField('E-mail', validators=[DataRequired(), Email()], filters=[lambda s: s.strip() if s is not None else s])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('remember', default=True)
     submit = SubmitField('Sign In')
@@ -96,6 +96,14 @@ class EditProfileForm(FlaskForm):
     password1 = PasswordField('New password', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
     password2 = PasswordField('New password (confirm)', validators=[LengthIf(['current_password', 'password1', 'password2'], min=8)])
     submit = SubmitField('Save profile')
+
+
+# -- Disable user ------------------------------------------------------------
+
+
+class DisableUserForm(FlaskForm):
+    disable = SubmitField('Disable account')
+    cancel = SubmitField('Cancel')
 
 
 # -- Create/delete OAUTH2 clients flow ---------------------------------------

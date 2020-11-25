@@ -61,7 +61,8 @@ class UserRegistry(object):
         filters = (
             User.email == self.normalize_email(email),
             User.password == self.password_hash(password),
-            User.active == True,
+            User.active.is_(True),
+            User.disabled.is_(False),
         )
 
         return session.query(User) \
@@ -137,6 +138,16 @@ class UserRegistry(object):
         session.query(User) \
             .filter(User.id == user.id) \
             .update({'reset_password_token': token})
+
+    @atomic
+    def disable_user(self, user, session):
+        """
+        :param User user:
+        :param Session session:
+        """
+        session.query(User) \
+            .filter(User.id == user.id) \
+            .update({'disabled': True})
 
 
 registry = UserRegistry()
