@@ -1,4 +1,5 @@
 import os
+import logging
 
 
 DEBUG = os.environ.get('DEBUG') in ('1', 't', 'true', 'yes')
@@ -11,6 +12,13 @@ SECRET = os.environ['SECRET']
 TOKEN_EXPIRE_SECONDS = int(os.environ['TOKEN_EXPIRE_MINUTES']) * 60
 CONSENT_EXPIRE_SECONDS = int(os.environ['CONSENT_EXPIRE_MINUTES']) * 60
 FAILURE_REDIRECT_URL = os.environ['FAILURE_REDIRECT_URL']
+
+_LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG')
+
+if hasattr(logging, _LOG_LEVEL):
+    LOG_LEVEL = getattr(logging, _LOG_LEVEL)
+else:
+    raise ValueError('Invalid LOG_LEVEL: %s' % _LOG_LEVEL)
 
 
 # -- Directories/paths -------------------------------------------------------
